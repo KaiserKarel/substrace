@@ -9,12 +9,12 @@ use rustc_span::{hygiene::SyntaxContext, symbol::sym, BytePos, Span};
 use std::str::FromStr;
 
 declare_lint! {
-    pub NO_PANICS,
+    pub PANICS,
     Deny,
     "any type of panicking code may not be present in the runtime"
 }
 
-impl_lint_pass!(NoPanics => [NO_PANICS]);
+impl_lint_pass!(Panics => [PANICS]);
 
 /// Clippy attributes which must be enabled in crates made for the substrate runtime or pallets.
 #[derive(EnumSetType, Debug)]
@@ -66,17 +66,17 @@ fn format_help(diff: EnumSet<RequiredAttributes>) -> String {
 }
 
 #[derive(Debug, Default)]
-pub struct NoPanics {
+pub struct Panics {
     seen_attributes: EnumSet<RequiredAttributes>,
 }
 
-impl NoPanics {
+impl Panics {
     pub fn new() -> Self {
         Default::default()
     }
 }
 
-impl<'hir> LateLintPass<'hir> for NoPanics {
+impl<'hir> LateLintPass<'hir> for Panics {
     fn check_attribute(&mut self, _: &LateContext<'_>, attr: &ast::Attribute) {
         if let Some(items) = &attr.meta_item_list() {
             if let Some(ident) = attr.ident() {
@@ -98,7 +98,7 @@ impl<'hir> LateLintPass<'hir> for NoPanics {
         if !diff.is_empty() {
             span_lint_and_sugg(
                 cx,
-                NO_PANICS,
+                PANICS,
                 Span::new(BytePos(0), BytePos(1), SyntaxContext::root(), None),
                 "clippy must be configured to warn or deny about any panicking code",
                 "insert attributes at the root of the crate",

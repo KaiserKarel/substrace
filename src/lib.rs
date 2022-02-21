@@ -37,8 +37,8 @@ mod linters;
 #[doc(hidden)]
 #[no_mangle]
 pub fn register_lints(_sess: &rustc_session::Session, lint_store: &mut rustc_lint::LintStore) {
-    lint_store.register_lints(&[linters::no_panics::NO_PANICS]);
-    lint_store.register_late_pass(|| Box::new(linters::no_panics::NoPanics::new()));
+    lint_store.register_lints(&[linters::no_panics::PANICS]);
+    lint_store.register_late_pass(|| Box::new(linters::no_panics::Panics::new()));
 }
 
 #[test]
