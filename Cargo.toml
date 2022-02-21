@@ -1,0 +1,22 @@
+[package]
+name = "substrace"
+version = "0.1.0"
+authors = ["authors go here"]
+description = "decription goes here"
+edition = "2018"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+clippy_utils = { git = "https://github.com/rust-lang/rust-clippy", tag = "rust-1.57.0"}
+dylint_linting = "1.0.9"
+enumset = "1.0.8"
+if_chain = "1.0.2"
+
+[dev-dependencies]
+dylint_testing = "1.0.9"
+
+[package.metadata.rust-analyzer]
+rustc_private = true
