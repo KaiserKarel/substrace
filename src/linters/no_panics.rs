@@ -3,6 +3,7 @@ use enumset::{EnumSet, EnumSetType};
 use if_chain::if_chain;
 use rustc_ast::{self as ast, *};
 use rustc_errors::Applicability;
+
 use rustc_lint::{LateContext, LateLintPass};
 use rustc_session::{declare_lint, impl_lint_pass};
 use rustc_span::{hygiene::SyntaxContext, symbol::sym, BytePos, Span};
