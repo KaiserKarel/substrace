@@ -15,7 +15,7 @@ libraries = [
 
 Now running `cargo dylint substrace --workspace` will download the linter and check your crates. Currently the following lints are used:
 
-`panics`: ensures that clippy has been properly configured to avoid panics in code.
-`storage_iter_insert`: checks that storage isn't simultaniously being mutated whilst iteration is active.
+- `panics`: ensures that clippy has been properly configured to avoid panics in code.
+- `storage_iter_insert`: checks that storage isn't simultaniously being mutated whilst iteration is active.
 
 More lints will be added in the future, initially targetting checks that ensure storage consistencies.
