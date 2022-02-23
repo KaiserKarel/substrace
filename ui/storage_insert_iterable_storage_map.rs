@@ -22,4 +22,10 @@ fn main() {
         T::iter();
         T::swap(1, 2, 3, 4);
     }
+
+    // Acceptable because mutation then iter handle is fine.
+    fn baz<T: IterableStorageDoubleMap<u32, u32, u32> + StorageDoubleMap<u32, u32, u32>>() {
+        T::swap(1, 2, 3, 4);
+        T::iter();
+    }
 }

@@ -62,6 +62,10 @@ impl StorageIterInsert {
 
     fn check_storage_double_map<'hir>(&mut self, cx: &LateContext<'hir>, fn_def_id: DefId) -> bool {
         if is_storage_double_map(cx, fn_def_id) {
+            if !self.iterating_over_storage_double_map {
+                self.storage_double_map_mutated = false;
+            }
+
             self.iterating_over_storage_double_map = true;
             true
         } else if modifies_storage_double_map(cx, fn_def_id) {
@@ -74,6 +78,9 @@ impl StorageIterInsert {
 
     fn check_storage_map<'hir>(&mut self, cx: &LateContext<'hir>, fn_def_id: DefId) -> bool {
         if is_storage_map(cx, fn_def_id) {
+            if !self.iterating_over_storage_map {
+                self.storage_map_mutated = false;
+            }
             self.iterating_over_storage_map = true;
             true
         } else if modifies_storage_map(cx, fn_def_id) {
