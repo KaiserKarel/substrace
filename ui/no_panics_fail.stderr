@@ -8,7 +8,7 @@ LL | fn main() {}
 help: insert attributes at the root of the crate
    |
 LL + #[warn(
-LL +     clippy::disallowed_method,
+LL +     clippy::disallowed_methods,
 LL +     clippy::indexing_slicing,
 LL +     clippy::todo,
 LL +     clippy::unwrap_used,
