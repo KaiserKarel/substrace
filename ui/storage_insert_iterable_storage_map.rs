@@ -3,7 +3,7 @@
 extern crate frame_support;
 
 #[warn(
-    clippy::disallowed_method,
+    clippy::disallowed_methods,
     clippy::indexing_slicing,
     clippy::todo,
     clippy::unwrap_used,
