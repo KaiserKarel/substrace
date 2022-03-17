@@ -34,7 +34,7 @@ impl FromStr for RequiredAttributes {
         use RequiredAttributes::*;
 
         match s {
-            "disallowed_method" => Ok(DisallowedMethod),
+            "disallowed_methods" => Ok(DisallowedMethod),
             "indexing_slicing" => Ok(IndexingSlicing),
             "todo" => Ok(Todo),
             "unwrap_used" => Ok(UnwrapUsed),
@@ -47,7 +47,7 @@ impl FromStr for RequiredAttributes {
 impl ToString for RequiredAttributes {
     fn to_string(&self) -> String {
         let s = match self {
-            RequiredAttributes::DisallowedMethod => "disallowed_method",
+            RequiredAttributes::DisallowedMethod => "disallowed_methods",
             RequiredAttributes::IndexingSlicing => "indexing_slicing",
             RequiredAttributes::Todo => "todo",
             RequiredAttributes::UnwrapUsed => "unwrap_used",
