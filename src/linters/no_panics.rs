@@ -11,7 +11,7 @@ use std::str::FromStr;
 
 declare_lint! {
     pub PANICS,
-    Deny,
+    Warn,
     "any type of panicking code may not be present in the runtime"
 }
 

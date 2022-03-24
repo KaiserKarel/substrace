@@ -14,6 +14,9 @@ clippy_utils = { git = "https://github.com/rust-lang/rust-clippy", tag = "rust-1
 dylint_linting = "1.0.9"
 enumset = "1.0.8"
 if_chain = "1.0.2"
+itertools = "0.10.3"
+pulldown-cmark = "0.9.1"
+url = "2.2.2"
 
 [dev-dependencies]
 dylint_testing = "1.0.9"

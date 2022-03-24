@@ -1,13 +1,7 @@
 #![feature(rustc_private)]
 #![allow(unused_extern_crates)]
+
 // Since Dylint is dynamically loading linters, we cannot allow for panics.
-#![warn(
-    clippy::disallowed_method,
-    clippy::indexing_slicing,
-    clippy::todo,
-    clippy::unwrap_used,
-    clippy::panic
-)]
 dylint_linting::dylint_library!();
 
 extern crate rustc_ast;
@@ -32,16 +26,19 @@ extern crate rustc_target;
 extern crate rustc_trait_selection;
 extern crate rustc_typeck;
 
-mod linters;
+pub mod linters;
+pub mod paths;
 
 #[doc(hidden)]
 #[no_mangle]
 pub fn register_lints(_sess: &rustc_session::Session, lint_store: &mut rustc_lint::LintStore) {
     lint_store.register_lints(&[linters::no_panics::PANICS]);
     lint_store.register_lints(&[linters::storage_iter_insert::STORAGE_ITER_INSERT]);
+    lint_store.register_lints(&[linters::missing_security_doc::MISSING_SECURITY_DOC]);
     lint_store.register_late_pass(|| Box::new(linters::no_panics::Panics::new()));
     lint_store
         .register_late_pass(|| Box::new(linters::storage_iter_insert::StorageIterInsert::new()));
+    lint_store.register_late_pass(|| Box::new(linters::missing_security_doc::DocMarkdown::new()));
 }
 
 #[test]

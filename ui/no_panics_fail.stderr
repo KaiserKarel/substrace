@@ -4,7 +4,7 @@ error: clippy must be configured to warn or deny about any panicking code
 LL | fn main() {}
    | ^
    |
-   = note: `#[deny(panics)]` on by default
+   = note: `-D panics` implied by `-D warnings`
 help: insert attributes at the root of the crate
    |
 LL + #[warn(
