@@ -1,137 +1,72 @@
-use clippy_utils::diagnostics::span_lint_and_help;
-use clippy_utils::match_def_path;
+use crate::paths;
+use clippy_utils::diagnostics::{span_lint_and_help, span_lint_and_sugg};
 use clippy_utils::source::first_line_of_span;
 use itertools::Itertools;
 use rustc_ast::ast::{AttrKind, Attribute};
 use rustc_ast::token::CommentKind;
 use rustc_data_structures::fx::FxHashSet;
+use rustc_errors::Applicability;
 use rustc_hir as hir;
 use rustc_lint::{LateContext, LateLintPass};
 use rustc_session::{declare_lint, impl_lint_pass};
-use rustc_span::edition::Edition;
 use rustc_span::source_map::{BytePos, Span};
 use rustc_span::{sym, Pos};
 use std::ops::Range;
 
-pub const STORAGE_MAP: [&str; 3] =
-        ["frame_support", "storage", "StorageMap"];
-
 declare_lint! {
     pub MISSING_SECURITY_DOC,
-    Deny,
+    Warn,
     "Using the Identity or Twox64Concat hasher requires a doc describing it's secure usage"
 }
 
 impl_lint_pass!(DocMarkdown => [MISSING_SECURITY_DOC]);
 
-#[derive(Clone)]
-pub struct DocMarkdown {
-    suspicious_hash_functions: FxHashSet<String>,
-    in_trait_impl: bool,
-}
+#[derive(Clone, Default)]
+pub struct DocMarkdown;
 
 impl DocMarkdown {
-    pub fn new(suspicious_hash_functions: FxHashSet<String>) -> Self {
-        Self {
-            suspicious_hash_functions,
-            in_trait_impl: false,
-        }
+    pub fn new() -> Self {
+        Self
     }
 }
 
 impl<'tcx> LateLintPass<'tcx> for DocMarkdown {
     fn check_item(&mut self, cx: &LateContext<'tcx>, item: &'tcx hir::Item<'_>) {
-        match item.kind {
-            hir::ItemKind::TyAlias(ty, ..) => {
-                if let hir::TyKind::TraitObject(ptr, ..) = ty.kind {
-                    if let hir::def::Res::Def(_, id) = ptr[0].trait_ref.path.res {
-                        if match_def_path(cx, id, &STORAGE_MAP) {
-                            panic!("found the storage map")
+        if let hir::ItemKind::TyAlias(ty, ..) = item.kind {
+            if let hir::TyKind::TraitObject(ptr, ..) = ty.kind {
+                if let Some(hir::def::Res::Def(_, id)) =
+                    ptr.get(0).map(|poly| poly.trait_ref.path.res)
+                {
+                    if paths::is_like_storage_map(cx, id) {
+                        let attrs = cx.tcx.hir().attrs(item.hir_id());
+                        let headers = check_attrs(cx, &Default::default(), attrs);
+                        if let Some(segments) = ptr.get(0).map(|poly| poly.trait_ref.path.segments)
+                        {
+                            for segment in segments {
+                                if let Some(args) = segment.args {
+                                    if paths::is_insecure_hash_function(cx, args)
+                                        && !headers.security
+                                    {
+                                        span_lint_and_sugg(
+                                            cx,
+                                            MISSING_SECURITY_DOC,
+                                            item.span,
+                                            "Twox{64, 128, 256} and Identity are at not secure",
+                                            "use Blake2, or add a # Security doc comment describing why the usage is correct",
+                                            "/// # Security
+/// Twox64Concat is safe because the ...".to_string(),
+                                            Applicability::HasPlaceholders,
+                                        );
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
-            _ => (),
         }
-        // let attrs = cx.tcx.hir().attrs(item.hir_id());
-        // let headers = check_attrs(cx, &self.valid_idents, attrs);
     }
 }
-
-// fn lint_for_missing_headers<'tcx>(
-//     cx: &LateContext<'tcx>,
-//     def_id: LocalDefId,
-//     span: impl Into<MultiSpan> + Copy,
-//     sig: &hir::FnSig<'_>,
-//     headers: DocHeaders,
-//     body_id: Option<hir::BodyId>,
-//     panic_span: Option<Span>,
-// ) {
-//     if !cx.access_levels.is_exported(def_id) {
-//         return; // Private functions do not require doc comments
-//     }
-
-//     // do not lint if any parent has `#[doc(hidden)]` attribute (#7347)
-//     if cx
-//         .tcx
-//         .hir()
-//         .parent_iter(cx.tcx.hir().local_def_id_to_hir_id(def_id))
-//         .any(|(id, _node)| is_doc_hidden(cx.tcx.hir().attrs(id)))
-//     {
-//         return;
-//     }
-
-//     if !headers.safety && sig.header.unsafety == hir::Unsafety::Unsafe {
-//         span_lint(
-//             cx,
-//             MISSING_SAFETY_DOC,
-//             span,
-//             "unsafe function's docs miss `# Safety` section",
-//         );
-//     }
-//     if !headers.panics && panic_span.is_some() {
-//         span_lint_and_note(
-//             cx,
-//             MISSING_PANICS_DOC,
-//             span,
-//             "docs for function which may panic missing `# Panics` section",
-//             panic_span,
-//             "first possible panic found here",
-//         );
-//     }
-//     if !headers.errors {
-//         let hir_id = cx.tcx.hir().local_def_id_to_hir_id(def_id);
-//         if is_type_diagnostic_item(cx, return_ty(cx, hir_id), sym::Result) {
-//             span_lint(
-//                 cx,
-//                 MISSING_ERRORS_DOC,
-//                 span,
-//                 "docs for function returning `Result` missing `# Errors` section",
-//             );
-//         } else {
-//             if_chain! {
-//                 if let Some(body_id) = body_id;
-//                 if let Some(future) = cx.tcx.lang_items().future_trait();
-//                 let typeck = cx.tcx.typeck_body(body_id);
-//                 let body = cx.tcx.hir().body(body_id);
-//                 let ret_ty = typeck.expr_ty(&body.value);
-//                 if implements_trait(cx, ret_ty, future, &[]);
-//                 if let ty::Opaque(_, subs) = ret_ty.kind();
-//                 if let Some(gen) = subs.types().next();
-//                 if let ty::Generator(_, subs, _) = gen.kind();
-//                 if is_type_diagnostic_item(cx, subs.as_generator().return_ty(), sym::Result);
-//                 then {
-//                     span_lint(
-//                         cx,
-//                         MISSING_ERRORS_DOC,
-//                         span,
-//                         "docs for function returning `Result` missing `# Errors` section",
-//                     );
-//                 }
-//             }
-//         }
-//     }
-// }
 
 /// Cleanup documentation decoration.
 ///
@@ -262,27 +197,23 @@ fn check_attrs<'a>(
     check_doc(cx, valid_idents, events, &spans)
 }
 
-const RUST_CODE: &[&str] = &["rust", "no_run", "should_panic", "compile_fail"];
-
+// Taken from the actually clippy codebase. Performs parsing of doc comments. Most likely this may be slimmed down by a lot for this linter's purposes.
 fn check_doc<'a, Events: Iterator<Item = (pulldown_cmark::Event<'a>, Range<usize>)>>(
     cx: &LateContext<'_>,
     _valid_idents: &FxHashSet<String>,
     events: Events,
     spans: &[(usize, Span)],
 ) -> DocHeaders {
-    // true if a safety header was found
+    use pulldown_cmark::CowStr;
     use pulldown_cmark::Event::{
         Code, End, FootnoteReference, HardBreak, Html, Rule, SoftBreak, Start, TaskListMarker, Text,
     };
     use pulldown_cmark::Tag::{CodeBlock, Heading, Item, Link, Paragraph};
-    use pulldown_cmark::{CodeBlockKind, CowStr};
 
     let mut headers = DocHeaders { security: false };
     let mut in_code = false;
     let mut in_link = None;
     let mut in_heading = false;
-    let mut is_rust = false;
-    let mut edition = None;
     let mut ticks_unbalanced = false;
     let mut text_to_check: Vec<(CowStr<'_>, Span)> = Vec::new();
     let mut paragraph_span = spans
@@ -291,26 +222,11 @@ fn check_doc<'a, Events: Iterator<Item = (pulldown_cmark::Event<'a>, Range<usize
         .1;
     for (event, range) in events {
         match event {
-            Start(CodeBlock(ref kind)) => {
+            Start(CodeBlock(_)) => {
                 in_code = true;
-                if let CodeBlockKind::Fenced(lang) = kind {
-                    for item in lang.split(',') {
-                        if item == "ignore" {
-                            is_rust = false;
-                            break;
-                        }
-                        if let Some(stripped) = item.strip_prefix("edition") {
-                            is_rust = true;
-                            edition = stripped.parse::<Edition>().ok();
-                        } else if item.is_empty() || RUST_CODE.contains(&item) {
-                            is_rust = true;
-                        }
-                    }
-                }
             }
             End(CodeBlock(_)) => {
                 in_code = false;
-                is_rust = false;
             }
             Start(Link(_, url, _)) => in_link = Some(url),
             End(Link(..)) => in_link = None,

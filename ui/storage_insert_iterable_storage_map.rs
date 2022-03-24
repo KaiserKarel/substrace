@@ -13,7 +13,7 @@ extern crate frame_support;
 use frame_support::storage::{IterableStorageMap, StorageMap, IterableStorageDoubleMap, StorageDoubleMap};
 
 fn main() {
-    fn foo<T: IterableStorageMap + StorageMap<u32, u32>>() {
+    fn foo<T: IterableStorageMap + StorageMap<(), u32, u32>>() {
         T::iter();
         T::swap(1, 2);
     }

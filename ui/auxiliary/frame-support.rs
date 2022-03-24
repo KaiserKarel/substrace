@@ -1,5 +1,10 @@
 #![allow(panics)]
 
+
+pub struct Twox64Concat;
+
+pub struct Identity;
+
 pub mod storage {
     pub trait IterableStorageMap {
         type Iter;
@@ -8,7 +13,7 @@ pub mod storage {
     }
 
 
-    pub trait StorageMap<K, V> {
+    pub trait StorageMap<Twox64Concat, K, V> {
         /// The type that get/take return.
         type Query;
 

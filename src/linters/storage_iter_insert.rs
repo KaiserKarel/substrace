@@ -1,5 +1,6 @@
-use clippy_utils::{diagnostics::span_lint_and_sugg, match_def_path};
+use clippy_utils::diagnostics::span_lint_and_sugg;
 
+use crate::paths;
 use rustc_errors::Applicability;
 use rustc_hir::{def_id::DefId, Body, Expr};
 use rustc_lint::{LateContext, LateLintPass};
@@ -61,14 +62,14 @@ impl StorageIterInsert {
     }
 
     fn check_storage_double_map<'hir>(&mut self, cx: &LateContext<'hir>, fn_def_id: DefId) -> bool {
-        if is_storage_double_map(cx, fn_def_id) {
+        if paths::is_storage_double_map(cx, fn_def_id) {
             if !self.iterating_over_storage_double_map {
                 self.storage_double_map_mutated = false;
             }
 
             self.iterating_over_storage_double_map = true;
             true
-        } else if modifies_storage_double_map(cx, fn_def_id) {
+        } else if paths::modifies_storage_double_map(cx, fn_def_id) {
             self.storage_double_map_mutated = true;
             true
         } else {
@@ -77,13 +78,13 @@ impl StorageIterInsert {
     }
 
     fn check_storage_map<'hir>(&mut self, cx: &LateContext<'hir>, fn_def_id: DefId) -> bool {
-        if is_storage_map(cx, fn_def_id) {
+        if paths::is_storage_map(cx, fn_def_id) {
             if !self.iterating_over_storage_map {
                 self.storage_map_mutated = false;
             }
             self.iterating_over_storage_map = true;
             true
-        } else if modifies_storage_map(cx, fn_def_id) {
+        } else if paths::modifies_storage_map(cx, fn_def_id) {
             self.storage_map_mutated = true;
             true
         } else {
@@ -94,135 +95,4 @@ impl StorageIterInsert {
     fn check_expr<'hir>(&mut self, cx: &LateContext<'hir>, fn_def_id: DefId) -> bool {
         self.check_storage_map(cx, fn_def_id) || self.check_storage_double_map(cx, fn_def_id)
     }
-}
-
-fn is_storage_map(cx: &LateContext<'_>, fn_def_id: DefId) -> bool {
-    match_def_path(cx, fn_def_id, &paths::ITERABLE_STORAGE_MAP_ITER)
-        || match_def_path(cx, fn_def_id, &paths::ITERABLE_STORAGE_MAP_DRAIN)
-}
-
-fn is_storage_double_map(cx: &LateContext<'_>, fn_def_id: DefId) -> bool {
-    match_def_path(
-        cx,
-        fn_def_id,
-        &paths::ITERABLE_STORAGE_DOUBLE_MAP_ITER_PREFIX,
-    ) || match_def_path(
-        cx,
-        fn_def_id,
-        &paths::ITERABLE_STORAGE_DOUBLE_MAP_DRAIN_PREFIX,
-    ) || match_def_path(cx, fn_def_id, &paths::ITERABLE_STORAGE_DOUBLE_MAP_ITER)
-        || match_def_path(cx, fn_def_id, &paths::ITERABLE_STORAGE_DOUBLE_MAP_DRAIN)
-}
-
-fn modifies_storage_double_map(cx: &LateContext<'_>, fn_def_id: DefId) -> bool {
-    match_def_path(cx, fn_def_id, &paths::ITERABLE_STORAGE_DOUBLE_MAP_SWAP)
-        || match_def_path(cx, fn_def_id, &paths::ITERABLE_STORAGE_DOUBLE_MAP_TAKE)
-        || match_def_path(cx, fn_def_id, &paths::ITERABLE_STORAGE_DOUBLE_MAP_INSERT)
-        || match_def_path(cx, fn_def_id, &paths::ITERABLE_STORAGE_DOUBLE_MAP_REMOVE)
-        || match_def_path(
-            cx,
-            fn_def_id,
-            &paths::ITERABLE_STORAGE_DOUBLE_MAP_REMOVE_PREFIX,
-        )
-        || match_def_path(
-            cx,
-            fn_def_id,
-            &paths::ITERABLE_STORAGE_DOUBLE_MAP_TRY_MUTATE,
-        )
-        || match_def_path(cx, fn_def_id, &paths::ITERABLE_STORAGE_DOUBLE_MAP_MUTATE)
-        || match_def_path(
-            cx,
-            fn_def_id,
-            &paths::ITERABLE_STORAGE_DOUBLE_MAP_TRY_MUTATE_EXISTS,
-        )
-        || match_def_path(cx, fn_def_id, &paths::ITERABLE_STORAGE_DOUBLE_MAP_APPEND)
-}
-
-fn modifies_storage_map(cx: &LateContext<'_>, fn_def_id: DefId) -> bool {
-    match_def_path(cx, fn_def_id, &paths::ITERABLE_STORAGE_MAP_SWAP)
-        || match_def_path(cx, fn_def_id, &paths::ITERABLE_STORAGE_MAP_REMOVE)
-        || match_def_path(cx, fn_def_id, &paths::ITERABLE_STORAGE_MAP_TAKE)
-        || match_def_path(cx, fn_def_id, &paths::ITERABLE_STORAGE_MAP_APPEND)
-        || match_def_path(cx, fn_def_id, &paths::ITERABLE_STORAGE_MAP_INSERT)
-        || match_def_path(cx, fn_def_id, &paths::ITERABLE_STORAGE_MAP_MIGRATE_KEY)
-        || match_def_path(
-            cx,
-            fn_def_id,
-            &paths::ITERABLE_STORAGE_MAP_MIGRATE_KEY_FROM_BLAKE,
-        )
-}
-
-mod paths {
-    pub const ITERABLE_STORAGE_MAP_ITER: [&str; 4] =
-        ["frame_support", "storage", "IterableStorageMap", "iter"];
-    pub const ITERABLE_STORAGE_MAP_DRAIN: [&str; 4] =
-        ["frame_support", "storage", "IterableStorageMap", "drain"];
-    pub const ITERABLE_STORAGE_DOUBLE_MAP_ITER_PREFIX: [&str; 4] = [
-        "frame_support",
-        "storage",
-        "IterableStorageDoubleMap",
-        "iter_prefix",
-    ];
-    pub const ITERABLE_STORAGE_DOUBLE_MAP_DRAIN_PREFIX: [&str; 4] = [
-        "frame_support",
-        "storage",
-        "IterableStorageDoubleMap",
-        "drain_prefix",
-    ];
-    pub const ITERABLE_STORAGE_DOUBLE_MAP_ITER: [&str; 4] = [
-        "frame_support",
-        "storage",
-        "IterableStorageDoubleMap",
-        "iter",
-    ];
-    pub const ITERABLE_STORAGE_DOUBLE_MAP_DRAIN: [&str; 4] = [
-        "frame_support",
-        "storage",
-        "IterableStorageDoubleMap",
-        "drain",
-    ];
-    pub const ITERABLE_STORAGE_MAP_INSERT: [&str; 4] =
-        ["frame_support", "storage", "StorageMap", "insert"];
-    pub const ITERABLE_STORAGE_MAP_SWAP: [&str; 4] =
-        ["frame_support", "storage", "StorageMap", "swap"];
-    pub const ITERABLE_STORAGE_MAP_REMOVE: [&str; 4] =
-        ["frame_support", "storage", "StorageMap", "remove"];
-    pub const ITERABLE_STORAGE_MAP_TAKE: [&str; 4] =
-        ["frame_support", "storage", "StorageMap", "take"];
-    pub const ITERABLE_STORAGE_MAP_APPEND: [&str; 4] =
-        ["frame_support", "storage", "StorageMap", "append"];
-    pub const ITERABLE_STORAGE_MAP_MIGRATE_KEY: [&str; 4] =
-        ["frame_support", "storage", "StorageMap", "migrate_key"];
-    pub const ITERABLE_STORAGE_MAP_MIGRATE_KEY_FROM_BLAKE: [&str; 4] = [
-        "frame_support",
-        "storage",
-        "StorageMap",
-        "migrate_key_from_blake",
-    ];
-    pub const ITERABLE_STORAGE_DOUBLE_MAP_SWAP: [&str; 4] =
-        ["frame_support", "storage", "StorageDoubleMap", "swap"];
-    pub const ITERABLE_STORAGE_DOUBLE_MAP_TAKE: [&str; 4] =
-        ["frame_support", "storage", "StorageDoubleMap", "take"];
-    pub const ITERABLE_STORAGE_DOUBLE_MAP_INSERT: [&str; 4] =
-        ["frame_support", "storage", "StorageDoubleMap", "insert"];
-    pub const ITERABLE_STORAGE_DOUBLE_MAP_REMOVE: [&str; 4] =
-        ["frame_support", "storage", "StorageDoubleMap", "remove"];
-    pub const ITERABLE_STORAGE_DOUBLE_MAP_REMOVE_PREFIX: [&str; 4] = [
-        "frame_support",
-        "storage",
-        "StorageDoubleMap",
-        "remove_prefix",
-    ];
-    pub const ITERABLE_STORAGE_DOUBLE_MAP_MUTATE: [&str; 4] =
-        ["frame_support", "storage", "StorageDoubleMap", "mutate"];
-    pub const ITERABLE_STORAGE_DOUBLE_MAP_APPEND: [&str; 4] =
-        ["frame_support", "storage", "StorageDoubleMap", "append"];
-    pub const ITERABLE_STORAGE_DOUBLE_MAP_TRY_MUTATE: [&str; 4] =
-        ["frame_support", "storage", "StorageDoubleMap", "try_mutate"];
-    pub const ITERABLE_STORAGE_DOUBLE_MAP_TRY_MUTATE_EXISTS: [&str; 4] = [
-        "frame_support",
-        "storage",
-        "StorageDoubleMap",
-        "try_mutate_exists",
-    ];
 }
