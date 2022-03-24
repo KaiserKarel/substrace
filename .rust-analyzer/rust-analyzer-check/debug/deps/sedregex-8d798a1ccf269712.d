@@ -1,0 +1,12 @@
+/home/karel/crates/substrace/.rust-analyzer/rust-analyzer-check/debug/deps/sedregex-8d798a1ccf269712.rmeta: /home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/lib.rs /home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/command.rs /home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/cow_appender.rs /home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/regex_flags.rs /home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/replace_command.rs /home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/replace_data.rs /home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/splitting_iter.rs /home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/str_ext.rs
+
+/home/karel/crates/substrace/.rust-analyzer/rust-analyzer-check/debug/deps/sedregex-8d798a1ccf269712.d: /home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/lib.rs /home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/command.rs /home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/cow_appender.rs /home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/regex_flags.rs /home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/replace_command.rs /home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/replace_data.rs /home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/splitting_iter.rs /home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/str_ext.rs
+
+/home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/lib.rs:
+/home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/command.rs:
+/home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/cow_appender.rs:
+/home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/regex_flags.rs:
+/home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/replace_command.rs:
+/home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/replace_data.rs:
+/home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/splitting_iter.rs:
+/home/karel/.cargo/registry/src/github.com-1ecc6299db9ec823/sedregex-0.2.5/src/str_ext.rs:

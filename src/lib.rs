@@ -39,9 +39,15 @@ mod linters;
 pub fn register_lints(_sess: &rustc_session::Session, lint_store: &mut rustc_lint::LintStore) {
     lint_store.register_lints(&[linters::no_panics::PANICS]);
     lint_store.register_lints(&[linters::storage_iter_insert::STORAGE_ITER_INSERT]);
+    lint_store.register_lints(&[linters::missing_security_doc::MISSING_SECURITY_DOC]);
     lint_store.register_late_pass(|| Box::new(linters::no_panics::Panics::new()));
     lint_store
         .register_late_pass(|| Box::new(linters::storage_iter_insert::StorageIterInsert::new()));
+    lint_store.register_late_pass(|| {
+        Box::new(linters::missing_security_doc::DocMarkdown::new(
+            Default::default(),
+        ))
+    });
 }
 
 #[test]
