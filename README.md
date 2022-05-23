@@ -1,6 +1,6 @@
 # Substrace: Experimental Static Analysis for Substrate Projects
 
-[Substrace](https://github.com/kaiserkarel/substrace) is a tool for linting susbtrate projects for specific gotchas and other errors.
+[Substrace](https://github.com/kaiserkarel/substrace) is a tool for linting substrate projects for specific gotchas and other errors.
 
 # Installing
 
