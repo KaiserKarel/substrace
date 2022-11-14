@@ -19,6 +19,4 @@ macro_rules! docs {
     }
 }
 
-docs! {
-
-}
+docs! {}

@@ -47,7 +47,7 @@ fn show_version() {
 
 pub fn main() {
     println!("CLIPPYING!!!!!");
-    
+
     // Check for version and help flags even when invoked as 'cargo-clippy'
     if env::args().any(|a| a == "--help" || a == "-h") {
         show_help();
