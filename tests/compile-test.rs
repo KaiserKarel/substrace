@@ -42,10 +42,6 @@ static TEST_DEPENDENCIES: &[&str] = &[
 // Test dependencies may need an `extern crate` here to ensure that they show up
 // in the depinfo file (otherwise cargo thinks they are unused)
 #[allow(unused_extern_crates)]
-extern crate substrace_lints;
-#[allow(unused_extern_crates)]
-extern crate substrace_utils;
-#[allow(unused_extern_crates)]
 extern crate derive_new;
 #[allow(unused_extern_crates)]
 extern crate futures;
@@ -59,6 +55,10 @@ extern crate parking_lot;
 extern crate quote;
 #[allow(unused_extern_crates)]
 extern crate rustc_semver;
+#[allow(unused_extern_crates)]
+extern crate substrace_lints;
+#[allow(unused_extern_crates)]
+extern crate substrace_utils;
 #[allow(unused_extern_crates)]
 extern crate syn;
 #[allow(unused_extern_crates)]
