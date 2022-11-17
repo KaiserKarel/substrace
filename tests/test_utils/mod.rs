@@ -3,10 +3,10 @@
 use std::path::PathBuf;
 use std::sync::LazyLock;
 
-pub static CARGO_CLIPPY_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
+pub static CARGO_SUBSTRACE_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
     let mut path = std::env::current_exe().unwrap();
     assert!(path.pop()); // deps
-    path.set_file_name("cargo-clippy");
+    path.set_file_name("cargo-substrace");
     path
 });
 
