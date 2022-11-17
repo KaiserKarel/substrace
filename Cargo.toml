@@ -1,15 +1,15 @@
 [package]
 name = "substrace"
-version = "0.0.0"
-description = "A bunch of helpful lints to avoid common pitfalls in Rust"
-repository = "https://github.com/rust-lang/rust-clippy"
+version = "0.2.0"
+description = "a tool for linting Substrate projects for specific gotchas and other errors"
+repository = "https://github.com/KaiserKarel/substrace"
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 keywords = ["substrace", "lint", "plugin"]
 categories = ["development-tools", "development-tools::cargo-plugins"]
 build = "build.rs"
 edition = "2021"
-publish = true
+publish = false
 default-run = "cargo-substrace"
 
 [[bin]]
