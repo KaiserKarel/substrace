@@ -9,10 +9,10 @@ use std::process::{self, Command};
 
 mod docs;
 
-const CARGO_CLIPPY_HELP: &str = r#"My Clippy: Checks a package to catch common mistakes and improve your Rust code.
+const CARGO_CLIPPY_HELP: &str = r#"Substrace: Checks a package to catch common mistakes and improve your Rust code.
 
 Usage:
-    cargo clippy [options] [--] [<opts>...]
+    cargo substrace [options] [--] [<opts>...]
 
 Common options:
     --no-deps                Run Clippy only on the given crate, without linting the dependencies
@@ -46,7 +46,7 @@ fn show_version() {
 }
 
 pub fn main() {
-    println!("CLIPPYING!!!!!");
+    println!("Starting Substrace...");
 
     // Check for version and help flags even when invoked as 'cargo-clippy'
     if env::args().any(|a| a == "--help" || a == "-h") {
