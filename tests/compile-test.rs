@@ -21,7 +21,6 @@ mod test_utils;
 /// All crates used in UI tests are listed here
 static TEST_DEPENDENCIES: &[&str] = &[
     "substrace_lints",
-    "substrace_utils",
     "derive_new",
     "futures",
     "if_chain",
@@ -54,8 +53,6 @@ extern crate quote;
 extern crate rustc_semver;
 #[allow(unused_extern_crates)]
 extern crate substrace_lints;
-#[allow(unused_extern_crates)]
-extern crate substrace_utils;
 #[allow(unused_extern_crates)]
 extern crate syn;
 #[allow(unused_extern_crates)]
