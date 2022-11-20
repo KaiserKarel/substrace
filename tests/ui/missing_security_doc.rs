@@ -1,4 +1,4 @@
-// #![allow(panics)]
+#![allow(panics)]
 // aux-build:frame-support.rs
 
 extern crate frame_support;
