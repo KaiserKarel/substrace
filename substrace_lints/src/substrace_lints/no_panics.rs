@@ -84,7 +84,6 @@ impl<'hir> LateLintPass<'hir> for Panics {
                 let ident = &*ident.as_str();
                 if matches!(ident, "warn" | "deny" | "forbid") {
                     items.iter().for_each(|item| {
-                        // println!("Is this run? {:?}", item);
                         if let Some(attr1) = extract_clippy_lint(item) {
                             self.seen_attributes.insert(attr1);
                         }
@@ -96,7 +95,6 @@ impl<'hir> LateLintPass<'hir> for Panics {
 
     fn check_crate_post(&mut self, cx: &LateContext<'hir>) {
         let diff = EnumSet::<RequiredAttributes>::all().difference(self.seen_attributes);
-        // println!("SEEN ATTRIBUTES: {:?}", self.seen_attributes);
 
         if !diff.is_empty() {
             span_lint_and_sugg(
