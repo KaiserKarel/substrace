@@ -127,6 +127,7 @@ fn base_config(test_dir: &str) -> compiletest::Config {
     } else {
         "substrace-driver"
     });
+    // config.bless = true; //overwrites stderr files to current error output.
     config
 }
 

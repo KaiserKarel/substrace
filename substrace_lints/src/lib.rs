@@ -156,7 +156,7 @@ mod utils;
 mod substrace_lints;
 use substrace_lints::{
     missing_security_doc,
-    // no_panics,
+    no_panics,
 };
 
 pub use crate::utils::conf::Conf;
@@ -259,11 +259,11 @@ pub fn read_conf(sess: &Session) -> Conf {
 #[expect(clippy::too_many_lines)]
 pub fn register_plugins(store: &mut rustc_lint::LintStore, sess: &Session, conf: &Conf) {
 
-    // store.register_lints(&[no_panics::PANICS]);
+    store.register_lints(&[no_panics::PANICS]);
     store.register_lints(&[missing_security_doc::MISSING_SECURITY_DOC]);
 
+    store.register_late_pass(|| Box::new(no_panics::Panics::new()));
     store.register_late_pass(|| Box::new(missing_security_doc::DocMarkdown));
-    // store.register_late_pass(|| Box::new(no_panics::Panics::new()));
 }
 
 // only exists to let the dogfood integration test works.

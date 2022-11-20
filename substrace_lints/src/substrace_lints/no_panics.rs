@@ -84,8 +84,9 @@ impl<'hir> LateLintPass<'hir> for Panics {
                 let ident = &*ident.as_str();
                 if matches!(ident, "warn" | "deny" | "forbid") {
                     items.iter().for_each(|item| {
-                        if let Some(attr) = extract_clippy_lint(item) {
-                            self.seen_attributes.insert(attr);
+                        // println!("Is this run? {:?}", item);
+                        if let Some(attr1) = extract_clippy_lint(item) {
+                            self.seen_attributes.insert(attr1);
                         }
                     });
                 }
@@ -95,6 +96,7 @@ impl<'hir> LateLintPass<'hir> for Panics {
 
     fn check_crate_post(&mut self, cx: &LateContext<'hir>) {
         let diff = EnumSet::<RequiredAttributes>::all().difference(self.seen_attributes);
+        // println!("SEEN ATTRIBUTES: {:?}", self.seen_attributes);
 
         if !diff.is_empty() {
             span_lint_and_sugg(
@@ -115,7 +117,7 @@ fn extract_clippy_lint(lint: &NestedMetaItem) -> Option<RequiredAttributes> {
         if let Some(meta_item) = lint.meta_item();
         if meta_item.path.segments.len() > 1;
         if let tool_name = meta_item.path.segments[0].ident;
-        if tool_name.name.as_str() == "substrace";
+        if tool_name.name.as_str() == "clippy";
         let lint_name = meta_item.path.segments.last().unwrap().ident.name;
         then {
             return RequiredAttributes::from_str(&lint_name.as_str()).ok();
