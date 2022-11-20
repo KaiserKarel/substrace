@@ -157,6 +157,7 @@ mod substrace_lints;
 use substrace_lints::{
     missing_security_doc,
     no_panics,
+    storage_iter_insert,
 };
 
 pub use crate::utils::conf::Conf;
@@ -261,9 +262,11 @@ pub fn register_plugins(store: &mut rustc_lint::LintStore, sess: &Session, conf:
 
     store.register_lints(&[no_panics::PANICS]);
     store.register_lints(&[missing_security_doc::MISSING_SECURITY_DOC]);
+    store.register_lints(&[storage_iter_insert::STORAGE_ITER_INSERT]);
 
     store.register_late_pass(|| Box::new(no_panics::Panics::new()));
     store.register_late_pass(|| Box::new(missing_security_doc::DocMarkdown));
+    store.register_late_pass(|| Box::new(storage_iter_insert::StorageIterInsert::new()))
 }
 
 // only exists to let the dogfood integration test works.
