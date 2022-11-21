@@ -64,9 +64,9 @@ fn test_arg_value() {
     assert_eq!(arg_value(args, "--foo", |_| true), None);
 }
 
-fn track_clippy_args(parse_sess: &mut ParseSess, args_env_var: &Option<String>) {
+fn track_substrace_args(parse_sess: &mut ParseSess, args_env_var: &Option<String>) {
     parse_sess.env_depinfo.get_mut().insert((
-        Symbol::intern("CLIPPY_ARGS"),
+        Symbol::intern("SUBSTRACE_ARGS"),
         args_env_var.as_deref().map(Symbol::intern),
     ));
 }
@@ -75,32 +75,32 @@ struct DefaultCallbacks;
 impl rustc_driver::Callbacks for DefaultCallbacks {}
 
 /// This is different from `DefaultCallbacks` that it will inform Cargo to track the value of
-/// `CLIPPY_ARGS` environment variable.
+/// `SUBSTRACE_ARGS` environment variable.
 struct RustcCallbacks {
-    clippy_args_var: Option<String>,
+    substrace_args_var: Option<String>,
 }
 
 impl rustc_driver::Callbacks for RustcCallbacks {
     fn config(&mut self, config: &mut interface::Config) {
-        let clippy_args_var = self.clippy_args_var.take();
+        let substrace_args_var = self.substrace_args_var.take();
         config.parse_sess_created = Some(Box::new(move |parse_sess| {
-            track_clippy_args(parse_sess, &clippy_args_var);
+            track_substrace_args(parse_sess, &substrace_args_var);
         }));
     }
 }
 
-struct ClippyCallbacks {
-    clippy_args_var: Option<String>,
+struct SubstraceCallbacks {
+    substrace_args_var: Option<String>,
 }
 
-impl rustc_driver::Callbacks for ClippyCallbacks {
-    // JUSTIFICATION: necessary in clippy driver to set `mir_opt_level`
+impl rustc_driver::Callbacks for SubstraceCallbacks {
+    // JUSTIFICATION: necessary in substrace driver to set `mir_opt_level`
     #[allow(rustc::bad_opt_access)]
     fn config(&mut self, config: &mut interface::Config) {
         let previous = config.register_lints.take();
-        let clippy_args_var = self.clippy_args_var.take();
+        let substrace_args_var = self.substrace_args_var.take();
         config.parse_sess_created = Some(Box::new(move |parse_sess| {
-            track_clippy_args(parse_sess, &clippy_args_var);
+            track_substrace_args(parse_sess, &substrace_args_var);
         }));
         config.register_lints = Some(Box::new(move |sess, lint_store| {
             // technically we're ~guaranteed that this is none but might as well call anything that
@@ -114,10 +114,10 @@ impl rustc_driver::Callbacks for ClippyCallbacks {
             substrace_lints::register_pre_expansion_lints(lint_store, sess, &conf);
         }));
 
-        // FIXME: #4825; This is required, because Clippy lints that are based on MIR have to be
+        // FIXME: #4825; This is required, because Substrace lints that are based on MIR have to be
         // run on the unoptimized MIR. On the other hand this results in some false negatives. If
         // MIR passes can be enabled / disabled separately, we should figure out, what passes to
-        // use for Clippy.
+        // use for Substrace.
         config.opts.unstable_opts.mir_opt_level = Some(0);
     }
 }
@@ -125,10 +125,10 @@ impl rustc_driver::Callbacks for ClippyCallbacks {
 fn display_help() {
     println!(
         "\
-My Clippy: Checks a package to catch common mistakes and improve your Rust code.
+Substrace: Checks a package to catch common mistakes and improve your Rust code.
 
 Usage:
-    cargo clippy [options] [--] [<opts>...]
+    cargo substrace [options] [--] [<opts>...]
 
 Common options:
     -h, --help               Print this message
@@ -137,7 +137,7 @@ Common options:
 
 Other options are the same as `cargo check`.
 
-To allow or deny a lint from the command line you can use `cargo clippy --`
+To allow or deny a lint from the command line you can use `cargo substrace --`
 with:
 
     -W --warn OPT       Set lint warnings
@@ -147,21 +147,21 @@ with:
 
 You can use tool lints to allow or deny lints from your code, eg.:
 
-    #[allow(clippy::needless_lifetimes)]
+    #[allow(substrace::needless_lifetimes)]
 "
     );
 }
 
-const BUG_REPORT_URL: &str = "https://github.com/rust-lang/rust-clippy/issues/new";
+const BUG_REPORT_URL: &str = "https://github.com/KaiserKarel/substrace/issues/new";
 
 type PanicCallback = dyn Fn(&panic::PanicInfo<'_>) + Sync + Send + 'static;
 static ICE_HOOK: LazyLock<Box<PanicCallback>> = LazyLock::new(|| {
     let hook = panic::take_hook();
-    panic::set_hook(Box::new(|info| report_clippy_ice(info, BUG_REPORT_URL)));
+    panic::set_hook(Box::new(|info| report_substrace_ice(info, BUG_REPORT_URL)));
     hook
 });
 
-fn report_clippy_ice(info: &panic::PanicInfo<'_>, bug_report_url: &str) {
+fn report_substrace_ice(info: &panic::PanicInfo<'_>, bug_report_url: &str) {
     // Invoke our ICE handler, which prints the actual panic message and optionally a backtrace
     (*ICE_HOOK)(info);
 
@@ -266,10 +266,10 @@ pub fn main() {
                 toolchain_path(home, toolchain)
             })
             .map(|pb| pb.to_string_lossy().to_string())
-            .expect("need to specify SYSROOT env var during clippy compilation, or use rustup or multirust");
+            .expect("need to specify SYSROOT env var during substrace compilation, or use rustup or multirust");
 
-        // make "clippy-driver --rustc" work like a subcommand that passes further args to "rustc"
-        // for example `clippy-driver --rustc --version` will print the rustc version that clippy-driver
+        // make "substrace-driver --rustc" work like a subcommand that passes further args to "rustc"
+        // for example `substrace-driver --rustc --version` will print the rustc version that substrace-driver
         // uses
         if let Some(pos) = orig_args.iter().position(|arg| arg == "--rustc") {
             orig_args.remove(pos);
@@ -305,7 +305,7 @@ pub fn main() {
         }
 
         // this conditional check for the --sysroot flag is there so users can call
-        // `clippy_driver` directly
+        // `substrace_driver` directly
         // without having to pass --sysroot or anything
         let mut args: Vec<String> = orig_args.clone();
         if !have_sys_root_arg {
@@ -313,11 +313,11 @@ pub fn main() {
         };
 
         let mut no_deps = false;
-        let clippy_args_var = env::var("CLIPPY_ARGS").ok();
-        let clippy_args = clippy_args_var
+        let substrace_args_var = env::var("SUBSTRACE_ARGS").ok();
+        let substrace_args = substrace_args_var
             .as_deref()
             .unwrap_or_default()
-            .split("__CLIPPY_HACKERY__")
+            .split("__SUBSTRACE_HACKERY__")
             .filter_map(|s| match s {
                 "" => None,
                 "--no-deps" => {
@@ -326,24 +326,24 @@ pub fn main() {
                 },
                 _ => Some(s.to_string()),
             })
-            .chain(vec!["--cfg".into(), r#"feature="cargo-clippy""#.into()])
+            .chain(vec!["--cfg".into(), r#"feature="cargo-substrace""#.into()])
             .collect::<Vec<String>>();
 
-        // We enable Clippy if one of the following conditions is met
-        // - IF Clippy is run on its test suite OR
-        // - IF Clippy is run on the main crate, not on deps (`!cap_lints_allow`) THEN
+        // We enable Substrace if one of the following conditions is met
+        // - IF Substrace is run on its test suite OR
+        // - IF Substrace is run on the main crate, not on deps (`!cap_lints_allow`) THEN
         //    - IF `--no-deps` is not set (`!no_deps`) OR
-        //    - IF `--no-deps` is set and Clippy is run on the specified primary package
+        //    - IF `--no-deps` is set and Substrace is run on the specified primary package
         let cap_lints_allow = arg_value(&orig_args, "--cap-lints", |val| val == "allow").is_some()
-            && arg_value(&orig_args, "--force-warn", |val| val.contains("clippy::")).is_none();
+            && arg_value(&orig_args, "--force-warn", |val| val.contains("substrace::")).is_none();
         let in_primary_package = env::var("CARGO_PRIMARY_PACKAGE").is_ok();
 
-        let clippy_enabled = !cap_lints_allow && (!no_deps || in_primary_package);
-        if clippy_enabled {
-            args.extend(clippy_args);
-            rustc_driver::RunCompiler::new(&args, &mut ClippyCallbacks { clippy_args_var }).run()
+        let substrace_enabled = !cap_lints_allow && (!no_deps || in_primary_package);
+        if substrace_enabled {
+            args.extend(substrace_args);
+            rustc_driver::RunCompiler::new(&args, &mut SubstraceCallbacks { substrace_args_var }).run()
         } else {
-            rustc_driver::RunCompiler::new(&args, &mut RustcCallbacks { clippy_args_var }).run()
+            rustc_driver::RunCompiler::new(&args, &mut RustcCallbacks { substrace_args_var }).run()
         }
     }))
 }

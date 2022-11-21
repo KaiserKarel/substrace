@@ -145,8 +145,6 @@ pub fn has_iter_method(cx: &LateContext<'_>, probably_ref_ty: Ty<'_>) -> Option<
 /// See:
 /// * [`get_trait_def_id`](super::get_trait_def_id) to get a trait [`DefId`].
 /// * [Common tools for writing lints] for an example how to use this function and other options.
-///
-/// [Common tools for writing lints]: https://github.com/rust-lang/rust-clippy/blob/master/book/src/development/common_tools_writing_lints.md#checking-if-a-type-implements-a-specific-trait
 pub fn implements_trait<'tcx>(
     cx: &LateContext<'tcx>,
     ty: Ty<'tcx>,
@@ -164,7 +162,7 @@ pub fn implements_trait_with_env<'tcx>(
     trait_id: DefId,
     ty_params: &[GenericArg<'tcx>],
 ) -> bool {
-    // Clippy shouldn't have infer types
+    // Substrace shouldn't have infer types
     assert!(!ty.needs_infer());
 
     let ty = tcx.erase_regions(ty);

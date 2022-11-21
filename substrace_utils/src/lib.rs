@@ -141,7 +141,7 @@ macro_rules! extract_msrv_attr {
                     if let Some(msrv) = msrv_attr.value_str() {
                         self.msrv = $crate::parse_msrv(&msrv.to_string(), Some(sess), Some(msrv_attr.span));
                     } else {
-                        sess.span_err(msrv_attr.span, "bad clippy attribute");
+                        sess.span_err(msrv_attr.span, "bad substrace attribute");
                     }
                 },
                 _ => (),
@@ -1694,7 +1694,6 @@ pub fn match_any_def_paths(cx: &LateContext<'_>, did: DefId, paths: &[&[&str]]) 
 
 /// Checks if the given `DefId` matches the path.
 pub fn match_def_path<'tcx>(cx: &LateContext<'tcx>, did: DefId, syms: &[&str]) -> bool {
-    // We should probably move to Symbols in Clippy as well rather than interning every time.
     let path = cx.get_def_path(did);
     syms.iter().map(|x| Symbol::intern(x)).eq(path.iter().copied())
 }

@@ -9,13 +9,13 @@ use std::process::{self, Command};
 
 mod docs;
 
-const CARGO_CLIPPY_HELP: &str = r#"Substrace: Checks a package to catch common mistakes and improve your Rust code.
+const CARGO_SUBSTRACE_HELP: &str = r#"Substrace: Checks a package to catch common mistakes and improve your Rust code.
 
 Usage:
     cargo substrace [options] [--] [<opts>...]
 
 Common options:
-    --no-deps                Run Clippy only on the given crate, without linting the dependencies
+    --no-deps                Run Substrace only on the given crate, without linting the dependencies
     --fix                    Automatically apply lint suggestions. This flag implies `--no-deps`
     -h, --help               Print this message
     -V, --version            Print version info and exit
@@ -23,7 +23,7 @@ Common options:
 
 Other options are the same as `cargo check`.
 
-To allow or deny a lint from the command line you can use `cargo clippy --`
+To allow or deny a lint from the command line you can use `cargo substrace --`
 with:
 
     -W --warn OPT       Set lint warnings
@@ -33,11 +33,11 @@ with:
 
 You can use tool lints to allow or deny lints from your code, eg.:
 
-    #[allow(clippy::needless_lifetimes)]
+    #[allow(substrace::panics)]
 "#;
 
 fn show_help() {
-    println!("{}", CARGO_CLIPPY_HELP);
+    println!("{}", CARGO_SUBSTRACE_HELP);
 }
 
 fn show_version() {
@@ -48,7 +48,7 @@ fn show_version() {
 pub fn main() {
     println!("Starting Substrace...");
 
-    // Check for version and help flags even when invoked as 'cargo-clippy'
+    // Check for version and help flags even when invoked as 'cargo-substrace'
     if env::args().any(|a| a == "--help" || a == "-h") {
         show_help();
         return;
@@ -75,20 +75,20 @@ pub fn main() {
     }
 }
 
-struct ClippyCmd {
+struct SubstraceCmd {
     cargo_subcommand: &'static str,
     args: Vec<String>,
-    clippy_args: Vec<String>,
+    substrace_args: Vec<String>,
 }
 
-impl ClippyCmd {
+impl SubstraceCmd {
     fn new<I>(mut old_args: I) -> Self
     where
         I: Iterator<Item = String>,
     {
         let mut cargo_subcommand = "check";
         let mut args = vec![];
-        let mut clippy_args: Vec<String> = vec![];
+        let mut substrace_args: Vec<String> = vec![];
 
         for arg in old_args.by_ref() {
             match arg.as_str() {
@@ -97,7 +97,7 @@ impl ClippyCmd {
                     continue;
                 },
                 "--no-deps" => {
-                    clippy_args.push("--no-deps".into());
+                    substrace_args.push("--no-deps".into());
                     continue;
                 },
                 "--" => break,
@@ -107,15 +107,15 @@ impl ClippyCmd {
             args.push(arg);
         }
 
-        clippy_args.append(&mut (old_args.collect()));
-        if cargo_subcommand == "fix" && !clippy_args.iter().any(|arg| arg == "--no-deps") {
-            clippy_args.push("--no-deps".into());
+        substrace_args.append(&mut (old_args.collect()));
+        if cargo_subcommand == "fix" && !substrace_args.iter().any(|arg| arg == "--no-deps") {
+            substrace_args.push("--no-deps".into());
         }
 
         Self {
             cargo_subcommand,
             args,
-            clippy_args,
+            substrace_args,
         }
     }
 
@@ -133,18 +133,18 @@ impl ClippyCmd {
 
     fn into_std_cmd(self) -> Command {
         let mut cmd = Command::new("cargo");
-        let clippy_args: String = self
-            .clippy_args
+        let substrace_args: String = self
+            .substrace_args
             .iter()
-            .map(|arg| format!("{}__CLIPPY_HACKERY__", arg))
+            .map(|arg| format!("{}__SUBSTRACE_HACKERY__", arg))
             .collect();
 
-        // Currently, `CLIPPY_TERMINAL_WIDTH` is used only to format "unknown field" error messages.
+        // Currently, `SUBSTRACE_TERMINAL_WIDTH` is used only to format "unknown field" error messages.
         let terminal_width = termize::dimensions().map_or(0, |(w, _)| w);
 
         cmd.env("RUSTC_WORKSPACE_WRAPPER", Self::path())
-            .env("CLIPPY_ARGS", clippy_args)
-            .env("CLIPPY_TERMINAL_WIDTH", terminal_width.to_string())
+            .env("SUBSTRACE_ARGS", substrace_args)
+            .env("SUBSTRACE_TERMINAL_WIDTH", terminal_width.to_string())
             .arg(self.cargo_subcommand)
             .args(&self.args);
 
@@ -156,11 +156,11 @@ fn process<I>(old_args: I) -> Result<(), i32>
 where
     I: Iterator<Item = String>,
 {
-    let cmd = ClippyCmd::new(old_args);
+    let cmd = SubstraceCmd::new(old_args);
 
     let mut cmd = cmd.into_std_cmd();
 
-    println!("cmd: {:?}", cmd); //TODO: This says ""cargo" "check"", then how does it run the clippy shit?
+    println!("cmd: {:?}", cmd);
 
     let exit_status = cmd
         .spawn()
@@ -177,36 +177,36 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::ClippyCmd;
+    use super::SubstraceCmd;
 
     #[test]
     fn fix() {
-        let args = "cargo clippy --fix".split_whitespace().map(ToString::to_string);
-        let cmd = ClippyCmd::new(args);
+        let args = "cargo substrace --fix".split_whitespace().map(ToString::to_string);
+        let cmd = SubstraceCmd::new(args);
         assert_eq!("fix", cmd.cargo_subcommand);
         assert!(!cmd.args.iter().any(|arg| arg.ends_with("unstable-options")));
     }
 
     #[test]
     fn fix_implies_no_deps() {
-        let args = "cargo clippy --fix".split_whitespace().map(ToString::to_string);
-        let cmd = ClippyCmd::new(args);
-        assert!(cmd.clippy_args.iter().any(|arg| arg == "--no-deps"));
+        let args = "cargo substrace --fix".split_whitespace().map(ToString::to_string);
+        let cmd = SubstraceCmd::new(args);
+        assert!(cmd.substrace_args.iter().any(|arg| arg == "--no-deps"));
     }
 
     #[test]
     fn no_deps_not_duplicated_with_fix() {
-        let args = "cargo clippy --fix -- --no-deps"
+        let args = "cargo substrace --fix -- --no-deps"
             .split_whitespace()
             .map(ToString::to_string);
-        let cmd = ClippyCmd::new(args);
-        assert_eq!(cmd.clippy_args.iter().filter(|arg| *arg == "--no-deps").count(), 1);
+        let cmd = SubstraceCmd::new(args);
+        assert_eq!(cmd.substrace_args.iter().filter(|arg| *arg == "--no-deps").count(), 1);
     }
 
     #[test]
     fn check() {
-        let args = "cargo clippy".split_whitespace().map(ToString::to_string);
-        let cmd = ClippyCmd::new(args);
+        let args = "cargo substrace".split_whitespace().map(ToString::to_string);
+        let cmd = SubstraceCmd::new(args);
         assert_eq!("check", cmd.cargo_subcommand);
     }
 }

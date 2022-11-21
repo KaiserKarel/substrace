@@ -21,42 +21,12 @@ mod test_utils;
 /// All crates used in UI tests are listed here
 static TEST_DEPENDENCIES: &[&str] = &[
     "substrace_lints",
-    "derive_new",
-    "futures",
-    "if_chain",
-    "itertools",
-    "quote",
-    "regex",
-    "serde",
-    "serde_derive",
-    "syn",
-    "tokio",
-    "parking_lot",
-    "rustc_semver",
 ];
 
 // Test dependencies may need an `extern crate` here to ensure that they show up
 // in the depinfo file (otherwise cargo thinks they are unused)
 #[allow(unused_extern_crates)]
-extern crate derive_new;
-#[allow(unused_extern_crates)]
-extern crate futures;
-#[allow(unused_extern_crates)]
-extern crate if_chain;
-#[allow(unused_extern_crates)]
-extern crate itertools;
-#[allow(unused_extern_crates)]
-extern crate parking_lot;
-#[allow(unused_extern_crates)]
-extern crate quote;
-#[allow(unused_extern_crates)]
-extern crate rustc_semver;
-#[allow(unused_extern_crates)]
 extern crate substrace_lints;
-#[allow(unused_extern_crates)]
-extern crate syn;
-#[allow(unused_extern_crates)]
-extern crate tokio;
 
 /// Produces a string with an `--extern` flag for all UI test crate
 /// dependencies.
@@ -163,7 +133,7 @@ fn base_config(test_dir: &str) -> compiletest::Config {
 fn run_ui() {
     let mut config = base_config("ui");
     config.rustfix_coverage = true;
-    // use tests/clippy.toml
+    
     let _g = VarGuard::set("CARGO_MANIFEST_DIR", fs::canonicalize("tests").unwrap());
     let _threads = VarGuard::set(
         "RUST_TEST_THREADS",
@@ -179,7 +149,7 @@ fn run_ui() {
 
 #[test]
 fn compile_test() {
-    set_var("CLIPPY_DISABLE_DOCS_LINKS", "true");
+    set_var("SUBSTRACE_DISABLE_DOCS_LINKS", "true");
     run_ui();
 }
 

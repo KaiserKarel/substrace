@@ -102,7 +102,7 @@ macro_rules! define_Conf {
         $(#[conf_deprecated($dep:literal, $new_conf:ident)])?
         ($name:ident: $ty:ty = $default:expr),
     )*) => {
-        /// Clippy lint configuration
+        /// Substrace lint configuration
         pub struct Conf {
             $($(#[doc = $doc])+ pub $name: $ty,)*
         }

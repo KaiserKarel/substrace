@@ -1,5 +1,5 @@
 //! A group of attributes that can be attached to Rust code in order
-//! to generate a clippy lint detecting said code automatically.
+//! to generate a substrace lint detecting said code automatically.
 
 use substrace_utils::{get_attr, higher};
 use rustc_ast::ast::{LitFloatType, LitKind};
@@ -16,17 +16,17 @@ use std::fmt::{Display, Formatter, Write as _};
 
 declare_substrace_lint! {
     /// ### What it does
-    /// Generates clippy code that detects the offending pattern
+    /// Generates substrace code that detects the offending pattern
     ///
     /// ### Example
     /// ```rust,ignore
     /// // ./tests/ui/my_lint.rs
     /// fn foo() {
     ///     // detect the following pattern
-    ///     #[clippy::author]
+    ///     #[substrace::author]
     ///     if x == 42 {
     ///         // but ignore everything from here on
-    ///         #![clippy::author = "ignore"]
+    ///         #![substrace::author = "ignore"]
     ///     }
     ///     ()
     /// }

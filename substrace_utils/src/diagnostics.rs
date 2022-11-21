@@ -1,8 +1,8 @@
-//! Clippy wrappers around rustc's diagnostic functions.
+//! Substrace wrappers around rustc's diagnostic functions.
 //!
 //! These functions are used by the `INTERNAL_METADATA_COLLECTOR` lint to collect the corresponding
 //! lint applicability. Please make sure that you update the `LINT_EMISSION_FUNCTIONS` variable in
-//! `clippy_lints::utils::internal_lints::metadata_collector` when a new function is added
+//! `substrace_lints::utils::internal_lints::metadata_collector` when a new function is added
 //! or renamed.
 //!
 //! Thank you!
@@ -15,10 +15,10 @@ use rustc_span::source_map::Span;
 use std::env;
 
 fn docs_link(diag: &mut Diagnostic, lint: &'static Lint) {
-    if env::var("CLIPPY_DISABLE_DOCS_LINKS").is_err() {
-        if let Some(lint) = lint.name_lower().strip_prefix("clippy::") {
+    if env::var("SUBSTRACE_DISABLE_DOCS_LINKS").is_err() {
+        if let Some(lint) = lint.name_lower().strip_prefix("substrace::") {
             diag.help(&format!(
-                "for further information visit https://rust-lang.github.io/rust-clippy/{}/index.html#{}",
+                "for further information visit https://KaiserKarel.github.io/substrace/{}/index.html#{}",
                 &option_env!("RUST_RELEASE_NUM").map_or("master".to_string(), |n| {
                     // extract just major + minor version and ignore patch versions
                     format!("rust-{}", n.rsplit_once('.').unwrap().1)
@@ -110,7 +110,7 @@ pub fn span_lint_and_help<'a, T: LintContext>(
 /// 10 |     forget(&SomeStruct);
 ///    |     ^^^^^^^^^^^^^^^^^^^
 ///    |
-///    = note: `-D clippy::forget-ref` implied by `-D warnings`
+///    = note: `-D substrace::forget-ref` implied by `-D warnings`
 /// note: argument has type &SomeStruct
 ///   --> $DIR/drop_forget_ref.rs:10:12
 ///    |
@@ -198,7 +198,7 @@ pub fn span_lint_hir_and_then(
 ///     |
 ///     = note: `-D fold-any` implied by `-D warnings`
 /// ```
-#[cfg_attr(feature = "internal", allow(clippy::collapsible_span_lint_calls))]
+#[cfg_attr(feature = "internal", allow(substrace::collapsible_span_lint_calls))]
 pub fn span_lint_and_sugg<'a, T: LintContext>(
     cx: &'a T,
     lint: &'static Lint,

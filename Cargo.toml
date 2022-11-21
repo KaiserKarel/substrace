@@ -22,7 +22,7 @@ name = "substrace-driver"
 path = "src/driver.rs"
 
 [dependencies]
-substrace_lints = { version = "0.1.65", path = "substrace_lints" }
+substrace_lints = { version = "0.2.0", path = "substrace_lints" }
 semver = "1.0"
 rustc_tools_util = "0.2.0"
 tempfile = { version = "3.2", optional = true }

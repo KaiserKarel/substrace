@@ -181,7 +181,7 @@ fn check_attrs<'a>(cx: &LateContext<'_>, valid_idents: &FxHashSet<String>, attrs
     check_doc(cx, valid_idents, events, &spans)
 }
 
-// Taken from the actually clippy codebase. Performs parsing of doc comments. Most likely this may
+// Taken from the actual clippy codebase. Performs parsing of doc comments. Most likely this may
 // be slimmed down by a lot for this linter's purposes.
 fn check_doc<'a, Events: Iterator<Item = (pulldown_cmark::Event<'a>, Range<usize>)>>(
     cx: &LateContext<'_>,

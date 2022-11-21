@@ -1,8 +1,3 @@
-// This code used to be a part of `rustc` but moved to Clippy as a result of
-// https://github.com/rust-lang/rust/issues/76618. Because of that, it contains unused code and some
-// of terminologies might not be relevant in the context of Clippy. Note that its behavior might
-// differ from the time of `rustc` even if the name stays the same.
-
 use rustc_hir as hir;
 use rustc_hir::def_id::DefId;
 use rustc_middle::mir::{

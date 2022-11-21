@@ -15,7 +15,7 @@ impl StrIndex {
 /// Returns the index of the character after the first camel-case component of `s`.
 ///
 /// ```
-/// # use clippy_utils::str_utils::{camel_case_until, StrIndex};
+/// # use substrace_utils::str_utils::{camel_case_until, StrIndex};
 /// assert_eq!(camel_case_until("AbcDef"), StrIndex::new(6, 6));
 /// assert_eq!(camel_case_until("ABCD"), StrIndex::new(0, 0));
 /// assert_eq!(camel_case_until("AbcDD"), StrIndex::new(3, 3));
@@ -59,7 +59,7 @@ pub fn camel_case_until(s: &str) -> StrIndex {
 /// Returns index of the first camel-case component of `s`.
 ///
 /// ```
-/// # use clippy_utils::str_utils::{camel_case_start, StrIndex};
+/// # use substrace_utils::str_utils::{camel_case_start, StrIndex};
 /// assert_eq!(camel_case_start("AbcDef"), StrIndex::new(0, 0));
 /// assert_eq!(camel_case_start("abcDef"), StrIndex::new(3, 3));
 /// assert_eq!(camel_case_start("ABCD"), StrIndex::new(4, 4));
@@ -74,7 +74,7 @@ pub fn camel_case_start(s: &str) -> StrIndex {
 /// Returns `StrIndex` of the last camel-case component of `s[idx..]`.
 ///
 /// ```
-/// # use clippy_utils::str_utils::{camel_case_start_from_idx, StrIndex};
+/// # use substrace_utils::str_utils::{camel_case_start_from_idx, StrIndex};
 /// assert_eq!(camel_case_start_from_idx("AbcDef", 0), StrIndex::new(0, 0));
 /// assert_eq!(camel_case_start_from_idx("AbcDef", 1), StrIndex::new(3, 3));
 /// assert_eq!(camel_case_start_from_idx("AbcDefGhi", 0), StrIndex::new(0, 0));
@@ -123,7 +123,7 @@ pub fn camel_case_start_from_idx(s: &str, start_idx: usize) -> StrIndex {
 /// Get the indexes of camel case components of a string `s`
 ///
 /// ```
-/// # use clippy_utils::str_utils::{camel_case_indices, StrIndex};
+/// # use substrace_utils::str_utils::{camel_case_indices, StrIndex};
 /// assert_eq!(
 ///     camel_case_indices("AbcDef"),
 ///     vec![StrIndex::new(0, 0), StrIndex::new(3, 3), StrIndex::new(6, 6)]
@@ -150,7 +150,7 @@ pub fn camel_case_indices(s: &str) -> Vec<StrIndex> {
 /// Split camel case string into a vector of its components
 ///
 /// ```
-/// # use clippy_utils::str_utils::{camel_case_split, StrIndex};
+/// # use substrace_utils::str_utils::{camel_case_split, StrIndex};
 /// assert_eq!(camel_case_split("AbcDef"), vec!["Abc", "Def"]);
 /// ```
 pub fn camel_case_split(s: &str) -> Vec<&str> {
@@ -182,9 +182,9 @@ impl StrCount {
 /// Returns the number of chars that match from the start
 ///
 /// ```
-/// # use clippy_utils::str_utils::{count_match_start, StrCount};
+/// # use substrace_utils::str_utils::{count_match_start, StrCount};
 /// assert_eq!(count_match_start("hello_mouse", "hello_penguin"), StrCount::new(6, 6));
-/// assert_eq!(count_match_start("hello_clippy", "bye_bugs"), StrCount::new(0, 0));
+/// assert_eq!(count_match_start("hello_substrace", "bye_bugs"), StrCount::new(0, 0));
 /// assert_eq!(count_match_start("hello_world", "hello_world"), StrCount::new(11, 11));
 /// assert_eq!(count_match_start("T\u{f6}ffT\u{f6}ff", "T\u{f6}ff"), StrCount::new(4, 5));
 /// ```
@@ -208,10 +208,10 @@ pub fn count_match_start(str1: &str, str2: &str) -> StrCount {
 /// Returns the number of chars and bytes that match from the end
 ///
 /// ```
-/// # use clippy_utils::str_utils::{count_match_end, StrCount};
+/// # use substrace_utils::str_utils::{count_match_end, StrCount};
 /// assert_eq!(count_match_end("hello_cat", "bye_cat"), StrCount::new(4, 4));
 /// assert_eq!(count_match_end("if_item_thing", "enum_value"), StrCount::new(0, 0));
-/// assert_eq!(count_match_end("Clippy", "Clippy"), StrCount::new(6, 6));
+/// assert_eq!(count_match_end("Substrace", "Substrace"), StrCount::new(6, 6));
 /// assert_eq!(count_match_end("MyT\u{f6}ff", "YourT\u{f6}ff"), StrCount::new(4, 5));
 /// ```
 #[must_use]

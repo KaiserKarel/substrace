@@ -41,16 +41,16 @@ pub mod metadata_collector;
 
 declare_substrace_lint! {
     /// ### What it does
-    /// Checks for various things we like to keep tidy in clippy.
+    /// Checks for various things we like to keep tidy in substrace.
     ///
     /// ### Why is this bad?
     /// We like to pretend we're an example of tidy code.
     ///
     /// ### Example
     /// Wrong ordering of the util::paths constants.
-    pub CLIPPY_LINTS_INTERNAL,
+    pub SUBSTRACE_LINTS_INTERNAL,
     internal,
-    "various things that will negatively affect your clippy experience"
+    "various things that will negatively affect your substrace experience"
 }
 
 declare_substrace_lint! {
@@ -86,7 +86,7 @@ declare_substrace_lint! {
     /// variant of the function.
     ///
     /// ### Why is this bad?
-    /// The `utils::*` variants also add a link to the Clippy documentation to the
+    /// The `utils::*` variants also add a link to the Substrace documentation to the
     /// warning/error messages.
     ///
     /// ### Example
@@ -283,51 +283,23 @@ declare_substrace_lint! {
 
 declare_substrace_lint! {
     /// ### What it does
-    /// Checks for unnecessary conversion from Symbol to a string.
-    ///
-    /// ### Why is this bad?
-    /// It's faster use symbols directly instead of strings.
-    ///
-    /// ### Example
-    /// ```rust,ignore
-    /// symbol.as_str() == "clippy";
-    /// ```
-    ///
-    /// Use instead:
-    /// ```rust,ignore
-    /// symbol == sym::clippy;
-    /// ```
-    pub UNNECESSARY_SYMBOL_STR,
-    internal,
-    "unnecessary conversion between Symbol and string"
-}
-
-declare_substrace_lint! {
-    /// Finds unidiomatic usage of `if_chain!`
-    pub IF_CHAIN_STYLE,
-    internal,
-    "non-idiomatic `if_chain!` usage"
-}
-
-declare_substrace_lint! {
-    /// ### What it does
-    /// Checks for invalid `clippy::version` attributes.
+    /// Checks for invalid `substrace::version` attributes.
     ///
     /// Valid values are:
     /// * "pre 1.29.0"
     /// * any valid semantic version
-    pub INVALID_CLIPPY_VERSION_ATTRIBUTE,
+    pub INVALID_SUBSTRACE_VERSION_ATTRIBUTE,
     internal,
-    "found an invalid `clippy::version` attribute"
+    "found an invalid `substrace::version` attribute"
 }
 
 declare_substrace_lint! {
     /// ### What it does
-    /// Checks for declared clippy lints without the `clippy::version` attribute.
+    /// Checks for declared substrace lints without the `substrace::version` attribute.
     ///
-    pub MISSING_CLIPPY_VERSION_ATTRIBUTE,
+    pub MISSING_SUBSTRACE_VERSION_ATTRIBUTE,
     internal,
-    "found clippy lint without `clippy::version` attribute"
+    "found substrace lint without `substrace::version` attribute"
 }
 
 declare_substrace_lint! {
@@ -355,7 +327,7 @@ declare_substrace_lint! {
     ///     ///
     ///     /// ### Deprecation reason
     ///     /// TODO
-    ///     #[clippy::version = "1.63.0"]
+    ///     #[substrace::version = "1.63.0"]
     ///     pub COOL_LINT,
     ///     "default deprecation note"
     /// }
@@ -369,7 +341,7 @@ declare_substrace_lint! {
     ///     ///
     ///     /// ### Deprecation reason
     ///     /// This lint has been replaced by `cooler_lint`
-    ///     #[clippy::version = "1.63.0"]
+    ///     #[substrace::version = "1.63.0"]
     ///     pub COOL_LINT,
     ///     "this lint has been replaced by `cooler_lint`"
     /// }
@@ -379,9 +351,9 @@ declare_substrace_lint! {
     "found 'default deprecation note' in a deprecated lint declaration"
 }
 
-declare_lint_pass!(ClippyLintsInternal => [CLIPPY_LINTS_INTERNAL]);
+declare_lint_pass!(SubstraceLintsInternal => [SUBSTRACE_LINTS_INTERNAL]);
 
-impl EarlyLintPass for ClippyLintsInternal {
+impl EarlyLintPass for SubstraceLintsInternal {
     fn check_crate(&mut self, cx: &EarlyContext<'_>, krate: &Crate) {
         if let Some(utils) = krate.items.iter().find(|item| item.ident.name.as_str() == "utils") {
             if let ItemKind::Mod(_, ModKind::Loaded(ref items, ..)) = utils.kind {
@@ -394,7 +366,7 @@ impl EarlyLintPass for ClippyLintsInternal {
                                 if *last_name > *name {
                                     span_lint(
                                         cx,
-                                        CLIPPY_LINTS_INTERNAL,
+                                        SUBSTRACE_LINTS_INTERNAL,
                                         item.span,
                                         "this constant should be before the previous constant due to lexical \
                                          ordering",
@@ -416,7 +388,7 @@ pub struct LintWithoutLintPass {
     registered_lints: FxHashSet<Symbol>,
 }
 
-impl_lint_pass!(LintWithoutLintPass => [DEFAULT_LINT, LINT_WITHOUT_LINT_PASS, INVALID_CLIPPY_VERSION_ATTRIBUTE, MISSING_CLIPPY_VERSION_ATTRIBUTE, DEFAULT_DEPRECATION_REASON]);
+impl_lint_pass!(LintWithoutLintPass => [DEFAULT_LINT, LINT_WITHOUT_LINT_PASS, INVALID_SUBSTRACE_VERSION_ATTRIBUTE, MISSING_SUBSTRACE_VERSION_ATTRIBUTE, DEFAULT_DEPRECATION_REASON]);
 
 impl<'tcx> LateLintPass<'tcx> for LintWithoutLintPass {
     fn check_item(&mut self, cx: &LateContext<'tcx>, item: &'tcx Item<'_>) {
@@ -429,7 +401,7 @@ impl<'tcx> LateLintPass<'tcx> for LintWithoutLintPass {
         if let hir::ItemKind::Static(ty, Mutability::Not, body_id) = item.kind {
             let is_lint_ref_ty = is_lint_ref_type(cx, ty);
             if is_deprecated_lint(cx, ty) || is_lint_ref_ty {
-                check_invalid_clippy_version_attribute(cx, item);
+                check_invalid_substrace_version_attribute(cx, item);
 
                 let expr = &cx.tcx.hir().body(body_id).value;
                 let fields;
@@ -556,8 +528,8 @@ fn is_lint_ref_type<'tcx>(cx: &LateContext<'tcx>, ty: &Ty<'_>) -> bool {
     false
 }
 
-fn check_invalid_clippy_version_attribute(cx: &LateContext<'_>, item: &'_ Item<'_>) {
-    if let Some(value) = extract_clippy_version_value(cx, item) {
+fn check_invalid_substrace_version_attribute(cx: &LateContext<'_>, item: &'_ Item<'_>) {
+    if let Some(value) = extract_substrace_version_value(cx, item) {
         // The `sym!` macro doesn't work as it only expects a single token.
         // It's better to keep it this way and have a direct `Symbol::intern` call here.
         if value == Symbol::intern("pre 1.29.0") {
@@ -567,9 +539,9 @@ fn check_invalid_clippy_version_attribute(cx: &LateContext<'_>, item: &'_ Item<'
         if RustcVersion::parse(value.as_str()).is_err() {
             span_lint_and_help(
                 cx,
-                INVALID_CLIPPY_VERSION_ATTRIBUTE,
+                INVALID_SUBSTRACE_VERSION_ATTRIBUTE,
                 item.span,
-                "this item has an invalid `clippy::version` attribute",
+                "this item has an invalid `substrace::version` attribute",
                 None,
                 "please use a valid semantic version, see `doc/adding_lints.md`",
             );
@@ -577,18 +549,18 @@ fn check_invalid_clippy_version_attribute(cx: &LateContext<'_>, item: &'_ Item<'
     } else {
         span_lint_and_help(
             cx,
-            MISSING_CLIPPY_VERSION_ATTRIBUTE,
+            MISSING_SUBSTRACE_VERSION_ATTRIBUTE,
             item.span,
-            "this lint is missing the `clippy::version` attribute or version value",
+            "this lint is missing the `substrace::version` attribute or version value",
             None,
-            "please use a `clippy::version` attribute, see `doc/adding_lints.md`",
+            "please use a `substrace::version` attribute, see `doc/adding_lints.md`",
         );
     }
 }
 
-/// This function extracts the version value of a `clippy::version` attribute if the given value has
+/// This function extracts the version value of a `substrace::version` attribute if the given value has
 /// one
-fn extract_clippy_version_value(cx: &LateContext<'_>, item: &'_ Item<'_>) -> Option<Symbol> {
+fn extract_substrace_version_value(cx: &LateContext<'_>, item: &'_ Item<'_>) -> Option<Symbol> {
     let attrs = cx.tcx.hir().attrs(item.hir_id());
     attrs.iter().find_map(|attr| {
         if_chain! {
@@ -666,7 +638,7 @@ impl<'tcx> LateLintPass<'tcx> for CompilerLintFunctions {
                     path.ident.span,
                     "usage of a compiler lint function",
                     None,
-                    &format!("please use the Clippy variant of this function: `{}`", sugg),
+                    &format!("please use the Substrace variant of this function: `{}`", sugg),
                 );
             }
         }
@@ -714,7 +686,7 @@ impl EarlyLintPass for ProduceIce {
 
 fn is_trigger_fn(fn_kind: FnKind<'_>) -> bool {
     match fn_kind {
-        FnKind::Fn(_, ident, ..) => ident.name.as_str() == "it_looks_like_you_are_trying_to_kill_clippy",
+        FnKind::Fn(_, ident, ..) => ident.name.as_str() == "it_looks_like_you_are_trying_to_kill_substrace",
         FnKind::Closure(..) => false,
     }
 }

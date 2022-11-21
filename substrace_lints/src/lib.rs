@@ -62,7 +62,7 @@ use rustc_session::Session;
 /// #![feature(rustc_private)]
 /// extern crate rustc_session;
 /// use rustc_session::declare_tool_lint;
-/// use clippy_lints::declare_substrace_lint;
+/// use substrace_lints::declare_substrace_lint;
 ///
 /// declare_substrace_lint! {
 ///     /// ### What it does
@@ -176,7 +176,7 @@ pub fn register_pre_expansion_lints(store: &mut rustc_lint::LintStore, sess: &Se
     let msrv = conf.msrv.as_ref().and_then(|s| {
         parse_msrv(s, None, None).or_else(|| {
             sess.err(&format!(
-                "error reading Clippy's configuration file. `{}` is not a valid Rust version",
+                "error reading Substrace's configuration file. `{}` is not a valid Rust version",
                 s
             ));
             None
@@ -190,10 +190,10 @@ fn read_msrv(conf: &Conf, sess: &Session) -> Option<RustcVersion> {
     let cargo_msrv = std::env::var("CARGO_PKG_RUST_VERSION")
         .ok()
         .and_then(|v| parse_msrv(&v, None, None));
-    let clippy_msrv = conf.msrv.as_ref().and_then(|s| {
+    let substrace_msrv = conf.msrv.as_ref().and_then(|s| {
         parse_msrv(s, None, None).or_else(|| {
             sess.err(&format!(
-                "error reading Clippy's configuration file. `{}` is not a valid Rust version",
+                "error reading Substrace's configuration file. `{}` is not a valid Rust version",
                 s
             ));
             None
@@ -201,21 +201,21 @@ fn read_msrv(conf: &Conf, sess: &Session) -> Option<RustcVersion> {
     });
 
     if let Some(cargo_msrv) = cargo_msrv {
-        if let Some(clippy_msrv) = clippy_msrv {
+        if let Some(substrace_msrv) = substrace_msrv {
             // if both files have an msrv, let's compare them and emit a warning if they differ
-            if clippy_msrv != cargo_msrv {
+            if substrace_msrv != cargo_msrv {
                 sess.warn(&format!(
-                    "the MSRV in `clippy.toml` and `Cargo.toml` differ; using `{}` from `clippy.toml`",
-                    clippy_msrv
+                    "the MSRV in `substrace.toml` and `Cargo.toml` differ; using `{}` from `substrace.toml`",
+                    substrace_msrv
                 ));
             }
 
-            Some(clippy_msrv)
+            Some(substrace_msrv)
         } else {
             Some(cargo_msrv)
         }
     } else {
-        clippy_msrv
+        substrace_msrv
     }
 }
 

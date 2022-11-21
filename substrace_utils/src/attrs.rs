@@ -5,7 +5,7 @@ use rustc_session::Session;
 use rustc_span::sym;
 use std::str::FromStr;
 
-/// Deprecation status of attributes known by Clippy.
+/// Deprecation status of attributes known by Substrace.
 pub enum DeprecationStatus {
     /// Attribute is deprecated
     Deprecated,
@@ -19,7 +19,6 @@ pub const BUILTIN_ATTRIBUTES: &[(&str, DeprecationStatus)] = &[
     ("author",                DeprecationStatus::None),
     ("version",               DeprecationStatus::None),
     ("cognitive_complexity",  DeprecationStatus::None),
-    ("cyclomatic_complexity", DeprecationStatus::Replaced("cognitive_complexity")),
     ("dump",                  DeprecationStatus::None),
     ("msrv",                  DeprecationStatus::None),
     ("has_significant_drop",  DeprecationStatus::None),
@@ -67,8 +66,6 @@ pub fn get_attr<'a>(
         let attr_segments = &attr.path.segments;
         println!("Is this even used? ");
         if attr_segments.len() == 2 && attr_segments[0].ident.name.as_str() == "substrace" {
-            // TODO: It used to use sym::clippy. But we cannot add substrace to sym and also not create a new
-            // Symbol (private new). How to prettify this?
             BUILTIN_ATTRIBUTES
                 .iter()
                 .find_map(|&(builtin_name, ref deprecation_status)| {
@@ -123,7 +120,7 @@ fn parse_attrs<F: FnMut(u64)>(sess: &Session, attrs: &[ast::Attribute], name: &'
                 sess.span_err(attr.span, "not a number");
             }
         } else {
-            sess.span_err(attr.span, "bad clippy attribute");
+            sess.span_err(attr.span, "bad substrace attribute");
         }
     }
 }
