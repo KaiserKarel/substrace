@@ -1,25 +1,68 @@
 [package]
 name = "substrace"
-version = "0.1.0"
-authors = ["authors go here"]
-description = "decription goes here"
-edition = "2018"
+version = "0.2.0"
+description = "a tool for linting Substrate projects for specific gotchas and other errors"
+repository = "https://github.com/KaiserKarel/substrace"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+keywords = ["substrace", "lint", "plugin"]
+categories = ["development-tools", "development-tools::cargo-plugins"]
+build = "build.rs"
+edition = "2021"
 publish = false
+default-run = "cargo-substrace"
 
-[lib]
-crate-type = ["cdylib"]
+[[bin]]
+name = "cargo-substrace"
+test = false
+path = "src/main.rs"
+
+[[bin]]
+name = "substrace-driver"
+path = "src/driver.rs"
 
 [dependencies]
-clippy_utils = { git = "https://github.com/rust-lang/rust-clippy", tag = "rust-1.57.0"}
-dylint_linting = "1.0.9"
-enumset = "1.0.8"
-if_chain = "1.0.2"
-itertools = "0.10.3"
-pulldown-cmark = "0.9.1"
-url = "2.2.2"
+substrace_lints = { version = "0.2.0", path = "substrace_lints" }
+semver = "1.0"
+rustc_tools_util = "0.2.0"
+tempfile = { version = "3.2", optional = true }
+termize = "0.1"
 
 [dev-dependencies]
-dylint_testing = "1.0.9"
+compiletest_rs = { version = "0.8", features = ["tmp"] }
+tester = "0.9"
+regex = "1.5"
+toml = "0.5"
+walkdir = "2.3"
+# This is used by the `collect-metadata` alias.
+filetime = "0.2"
+
+# A noop dependency that changes in the Rust repository, it's a bit of a hack.
+# See the `src/tools/rustc-workspace-hack/README.md` file in `rust-lang/rust`
+# for more information.
+rustc-workspace-hack = "1.0"
+
+# UI test dependencies
+clap = { version = "3.1", features = ["derive"] }
+derive-new = "0.5"
+if_chain = "1.0"
+itertools = "0.10.1"
+quote = "1.0"
+serde = { version = "1.0.125", features = ["derive"] }
+syn = { version = "1.0", features = ["full"] }
+futures = "0.3"
+parking_lot = "0.12"
+tokio = { version = "1", features = ["io-util"] }
+rustc-semver = "1.1"
+
+[build-dependencies]
+rustc_tools_util = "0.2"
+
+[features]
+deny-warnings = ["substrace_lints/deny-warnings"]
+integration = ["tempfile"]
+internal = ["substrace_lints/internal", "tempfile"]
 
 [package.metadata.rust-analyzer]
+# This package uses #[feature(rustc_private)]
 rustc_private = true
