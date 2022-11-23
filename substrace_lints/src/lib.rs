@@ -41,7 +41,7 @@ use rustc_lint::LintId;
 use rustc_semver::RustcVersion;
 use rustc_session::Session;
 
-/// Macro used to declare a Clippy lint.
+/// Macro used to declare a Substrace lint.
 ///
 /// Every lint declaration consists of 4 parts:
 ///
