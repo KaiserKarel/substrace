@@ -2,13 +2,12 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use crate::line_span;
 use rustc_errors::Applicability;
 use rustc_hir::{Expr, ExprKind};
 use rustc_lint::{LateContext, LintContext};
 use rustc_span::hygiene;
-use rustc_span::source_map::SourceMap;
-use rustc_span::{BytePos, Pos, Span, SpanData, SyntaxContext};
+use rustc_span::source_map::{original_sp, SourceMap};
+use rustc_span::{BytePos, Pos, Span, SpanData, SyntaxContext, DUMMY_SP};
 use std::borrow::Cow;
 
 /// Like `snippet_block`, but add braces if the expr is not an `ExprKind::Block`.
@@ -25,11 +24,11 @@ pub fn expr_block<'a, T: LintContext>(
     if expr.span.from_expansion() {
         Cow::Owned(format!("{{ {} }}", snippet_with_macro_callsite(cx, expr.span, default)))
     } else if let ExprKind::Block(_, _) = expr.kind {
-        Cow::Owned(format!("{}{}", code, string))
+        Cow::Owned(format!("{code}{string}"))
     } else if string.is_empty() {
-        Cow::Owned(format!("{{ {} }}", code))
+        Cow::Owned(format!("{{ {code} }}"))
     } else {
-        Cow::Owned(format!("{{\n{};\n{}\n}}", code, string))
+        Cow::Owned(format!("{{\n{code};\n{string}\n}}"))
     }
 }
 
@@ -53,6 +52,23 @@ fn first_char_in_first_line<T: LintContext>(cx: &T, span: Span) -> Option<BytePo
         snip.find(|c: char| !c.is_whitespace())
             .map(|pos| line_span.lo() + BytePos::from_usize(pos))
     })
+}
+
+/// Extends the span to the beginning of the spans line, incl. whitespaces.
+///
+/// ```rust
+///        let x = ();
+/// //             ^^
+/// // will be converted to
+///        let x = ();
+/// // ^^^^^^^^^^^^^^
+/// ```
+fn line_span<T: LintContext>(cx: &T, span: Span) -> Span {
+    let span = original_sp(span, DUMMY_SP);
+    let source_map_and_line = cx.sess().source_map().lookup_line(span.lo()).unwrap();
+    let line_no = source_map_and_line.line;
+    let line_start = source_map_and_line.sf.lines(|lines| lines[line_no]);
+    span.with_lo(line_start)
 }
 
 /// Returns the indentation of the line of a span
@@ -392,6 +408,16 @@ pub fn trim_span(sm: &SourceMap, span: Span) -> Span {
     .span()
 }
 
+/// Expand a span to include a preceding comma
+/// ```rust,ignore
+/// writeln!(o, "")   ->   writeln!(o, "")
+///             ^^                   ^^^^
+/// ```
+pub fn expand_past_previous_comma(cx: &LateContext<'_>, span: Span) -> Span {
+    let extended = cx.sess().source_map().span_extend_to_prev_char(span, ',', true);
+    extended.with_lo(extended.lo() - BytePos(1))
+}
+
 #[cfg(test)]
 mod test {
     use super::{reindent_multiline, without_block_comments};
@@ -466,7 +492,7 @@ mod test {
     #[test]
     fn test_without_block_comments_lines_without_block_comments() {
         let result = without_block_comments(vec!["/*", "", "*/"]);
-        println!("result: {:?}", result);
+        println!("result: {result:?}");
         assert!(result.is_empty());
 
         let result = without_block_comments(vec!["", "/*", "", "*/", "#[crate_type = \"lib\"]", "/*", "", "*/", ""]);

@@ -1,8 +1,8 @@
-//! Substrace wrappers around rustc's diagnostic functions.
+//! Clippy wrappers around rustc's diagnostic functions.
 //!
 //! These functions are used by the `INTERNAL_METADATA_COLLECTOR` lint to collect the corresponding
 //! lint applicability. Please make sure that you update the `LINT_EMISSION_FUNCTIONS` variable in
-//! `substrace_lints::utils::internal_lints::metadata_collector` when a new function is added
+//! `clippy_lints::utils::internal_lints::metadata_collector` when a new function is added
 //! or renamed.
 //!
 //! Thank you!
@@ -15,15 +15,14 @@ use rustc_span::source_map::Span;
 use std::env;
 
 fn docs_link(diag: &mut Diagnostic, lint: &'static Lint) {
-    if env::var("SUBSTRACE_DISABLE_DOCS_LINKS").is_err() {
-        if let Some(lint) = lint.name_lower().strip_prefix("substrace::") {
+    if env::var("CLIPPY_DISABLE_DOCS_LINKS").is_err() {
+        if let Some(lint) = lint.name_lower().strip_prefix("clippy::") {
             diag.help(&format!(
-                "for further information visit https://KaiserKarel.github.io/substrace/{}/index.html#{}",
+                "for further information visit https://rust-lang.github.io/rust-clippy/{}/index.html#{lint}",
                 &option_env!("RUST_RELEASE_NUM").map_or("master".to_string(), |n| {
                     // extract just major + minor version and ignore patch versions
                     format!("rust-{}", n.rsplit_once('.').unwrap().1)
-                }),
-                lint
+                })
             ));
         }
     }
@@ -47,10 +46,9 @@ fn docs_link(diag: &mut Diagnostic, lint: &'static Lint) {
 ///    |     ^^^^^^^^^^^^^^^^^^^^^^^
 /// ```
 pub fn span_lint<T: LintContext>(cx: &T, lint: &'static Lint, sp: impl Into<MultiSpan>, msg: &str) {
-    cx.struct_span_lint(lint, sp, |diag| {
-        let mut diag = diag.build(msg);
-        docs_link(&mut diag, lint);
-        diag.emit();
+    cx.struct_span_lint(lint, sp, msg, |diag| {
+        docs_link(diag, lint);
+        diag
     });
 }
 
@@ -74,23 +72,22 @@ pub fn span_lint<T: LintContext>(cx: &T, lint: &'static Lint, sp: impl Into<Mult
 ///    |
 ///    = help: consider using `f64::NAN` if you would like a constant representing NaN
 /// ```
-pub fn span_lint_and_help<'a, T: LintContext>(
-    cx: &'a T,
+pub fn span_lint_and_help<T: LintContext>(
+    cx: &T,
     lint: &'static Lint,
     span: impl Into<MultiSpan>,
     msg: &str,
     help_span: Option<Span>,
     help: &str,
 ) {
-    cx.struct_span_lint(lint, span, |diag| {
-        let mut diag = diag.build(msg);
+    cx.struct_span_lint(lint, span, msg, |diag| {
         if let Some(help_span) = help_span {
             diag.span_help(help_span, help);
         } else {
             diag.help(help);
         }
-        docs_link(&mut diag, lint);
-        diag.emit();
+        docs_link(diag, lint);
+        diag
     });
 }
 
@@ -110,30 +107,29 @@ pub fn span_lint_and_help<'a, T: LintContext>(
 /// 10 |     forget(&SomeStruct);
 ///    |     ^^^^^^^^^^^^^^^^^^^
 ///    |
-///    = note: `-D substrace::forget-ref` implied by `-D warnings`
+///    = note: `-D clippy::forget-ref` implied by `-D warnings`
 /// note: argument has type &SomeStruct
 ///   --> $DIR/drop_forget_ref.rs:10:12
 ///    |
 /// 10 |     forget(&SomeStruct);
 ///    |            ^^^^^^^^^^^
 /// ```
-pub fn span_lint_and_note<'a, T: LintContext>(
-    cx: &'a T,
+pub fn span_lint_and_note<T: LintContext>(
+    cx: &T,
     lint: &'static Lint,
     span: impl Into<MultiSpan>,
     msg: &str,
     note_span: Option<Span>,
     note: &str,
 ) {
-    cx.struct_span_lint(lint, span, |diag| {
-        let mut diag = diag.build(msg);
+    cx.struct_span_lint(lint, span, msg, |diag| {
         if let Some(note_span) = note_span {
             diag.span_note(note_span, note);
         } else {
             diag.note(note);
         }
-        docs_link(&mut diag, lint);
-        diag.emit();
+        docs_link(diag, lint);
+        diag
     });
 }
 
@@ -147,19 +143,17 @@ where
     S: Into<MultiSpan>,
     F: FnOnce(&mut Diagnostic),
 {
-    cx.struct_span_lint(lint, sp, |diag| {
-        let mut diag = diag.build(msg);
-        f(&mut diag);
-        docs_link(&mut diag, lint);
-        diag.emit();
+    cx.struct_span_lint(lint, sp, msg, |diag| {
+        f(diag);
+        docs_link(diag, lint);
+        diag
     });
 }
 
 pub fn span_lint_hir(cx: &LateContext<'_>, lint: &'static Lint, hir_id: HirId, sp: Span, msg: &str) {
-    cx.tcx.struct_span_lint_hir(lint, hir_id, sp, |diag| {
-        let mut diag = diag.build(msg);
-        docs_link(&mut diag, lint);
-        diag.emit();
+    cx.tcx.struct_span_lint_hir(lint, hir_id, sp, msg, |diag| {
+        docs_link(diag, lint);
+        diag
     });
 }
 
@@ -171,11 +165,10 @@ pub fn span_lint_hir_and_then(
     msg: &str,
     f: impl FnOnce(&mut Diagnostic),
 ) {
-    cx.tcx.struct_span_lint_hir(lint, hir_id, sp, |diag| {
-        let mut diag = diag.build(msg);
-        f(&mut diag);
-        docs_link(&mut diag, lint);
-        diag.emit();
+    cx.tcx.struct_span_lint_hir(lint, hir_id, sp, msg, |diag| {
+        f(diag);
+        docs_link(diag, lint);
+        diag
     });
 }
 
@@ -198,9 +191,9 @@ pub fn span_lint_hir_and_then(
 ///     |
 ///     = note: `-D fold-any` implied by `-D warnings`
 /// ```
-#[cfg_attr(feature = "internal", allow(substrace::collapsible_span_lint_calls))]
-pub fn span_lint_and_sugg<'a, T: LintContext>(
-    cx: &'a T,
+#[cfg_attr(feature = "internal", allow(clippy::collapsible_span_lint_calls))]
+pub fn span_lint_and_sugg<T: LintContext>(
+    cx: &T,
     lint: &'static Lint,
     sp: Span,
     msg: &str,
