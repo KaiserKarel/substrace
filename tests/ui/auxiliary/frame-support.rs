@@ -1,5 +1,5 @@
 // Mocking file structure of frame-support project
-// #![allow(panics)]
+#![allow(panics)]
 #![allow(clippy::result_unit_err)]
 
 pub mod hash {

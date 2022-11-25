@@ -35,7 +35,6 @@ extern crate rustc_span;
 #[macro_use]
 extern crate substrace_utils;
 
-use substrace_utils::parse_msrv;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_lint::LintId;
 use rustc_semver::RustcVersion;
@@ -156,7 +155,7 @@ mod utils;
 mod substrace_lints;
 use substrace_lints::{
     missing_security_doc,
-    // no_panics,
+    no_panics,
 };
 
 pub use crate::utils::conf::Conf;
@@ -171,52 +170,7 @@ use crate::utils::conf::{format_error, TryConf};
 ///
 /// Used in `./src/driver.rs`.
 pub fn register_pre_expansion_lints(store: &mut rustc_lint::LintStore, sess: &Session, conf: &Conf) {
-    // NOTE: Do not add any more pre-expansion passes. These should be removed eventually.
 
-    let msrv = conf.msrv.as_ref().and_then(|s| {
-        parse_msrv(s, None, None).or_else(|| {
-            sess.err(&format!(
-                "error reading Substrace's configuration file. `{}` is not a valid Rust version",
-                s
-            ));
-            None
-        })
-    });
-
-    // store.register_pre_expansion_pass(move || Box::new(attrs::EarlyAttributes { msrv }));
-}
-
-fn read_msrv(conf: &Conf, sess: &Session) -> Option<RustcVersion> {
-    let cargo_msrv = std::env::var("CARGO_PKG_RUST_VERSION")
-        .ok()
-        .and_then(|v| parse_msrv(&v, None, None));
-    let substrace_msrv = conf.msrv.as_ref().and_then(|s| {
-        parse_msrv(s, None, None).or_else(|| {
-            sess.err(&format!(
-                "error reading Substrace's configuration file. `{}` is not a valid Rust version",
-                s
-            ));
-            None
-        })
-    });
-
-    if let Some(cargo_msrv) = cargo_msrv {
-        if let Some(substrace_msrv) = substrace_msrv {
-            // if both files have an msrv, let's compare them and emit a warning if they differ
-            if substrace_msrv != cargo_msrv {
-                sess.warn(&format!(
-                    "the MSRV in `substrace.toml` and `Cargo.toml` differ; using `{}` from `substrace.toml`",
-                    substrace_msrv
-                ));
-            }
-
-            Some(substrace_msrv)
-        } else {
-            Some(cargo_msrv)
-        }
-    } else {
-        substrace_msrv
-    }
 }
 
 #[doc(hidden)]
@@ -259,11 +213,11 @@ pub fn read_conf(sess: &Session) -> Conf {
 #[expect(clippy::too_many_lines)]
 pub fn register_plugins(store: &mut rustc_lint::LintStore, sess: &Session, conf: &Conf) {
 
-    // store.register_lints(&[no_panics::PANICS]);
+    store.register_lints(&[no_panics::PANICS]);
     store.register_lints(&[missing_security_doc::MISSING_SECURITY_DOC]);
 
-    store.register_late_pass(|| Box::new(missing_security_doc::DocMarkdown));
-    // store.register_late_pass(|| Box::new(no_panics::Panics::new()));
+    store.register_late_pass(|_| Box::new(no_panics::Panics::new()));
+    store.register_late_pass(|_| Box::new(missing_security_doc::DocMarkdown));
 }
 
 // only exists to let the dogfood integration test works.
