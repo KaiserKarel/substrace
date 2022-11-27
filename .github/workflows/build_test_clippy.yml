@@ -18,6 +18,7 @@ jobs:
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: nightly-2022-11-21
+        components: clippy
     - name: Build
       run: cargo build --verbose
     - name: Run tests
