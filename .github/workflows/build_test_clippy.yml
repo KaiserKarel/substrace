@@ -9,7 +9,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  test:
+  build-test-clippy:
 
     runs-on: ubuntu-latest
 
