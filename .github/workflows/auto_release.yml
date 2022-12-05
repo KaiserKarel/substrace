@@ -1,0 +1,19 @@
+# When a tag with a semantic version number is pushed, create a Github release
+name: Publish Release
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags: 
+      - v**.**.** 
+
+
+jobs:
+  tagged-release:
+    name: "Tagged Release"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: "marvinpinto/action-automatic-releases@v1.2.1"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
