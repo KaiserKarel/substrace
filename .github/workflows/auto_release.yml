@@ -8,12 +8,24 @@ on:
 
 
 jobs:
-  tagged-release:
+  github-release:
     name: "Tagged Release"
     runs-on: "ubuntu-latest"
 
     steps:
+      - uses: actions/checkout@v3
       - uses: "marvinpinto/action-automatic-releases@v1.2.1"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
+  crates-release:
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+            toolchain: stable
+            override: true
+      - uses: katyo/publish-crates@v1
+        with:
+            args: --no-verify
+            dry-run: true
