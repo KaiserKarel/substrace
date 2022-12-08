@@ -156,6 +156,7 @@ mod substrace_lints;
 use substrace_lints::{
     extrinsics_must_be_tagged,
     missing_security_doc,
+    missing_transactional,
     no_panics,
 };
 
@@ -218,6 +219,7 @@ pub fn register_plugins(store: &mut rustc_lint::LintStore, sess: &Session, conf:
 
     store.register_late_pass(|_| Box::new(extrinsics_must_be_tagged::ExtrinsicsMustBeTagged));
     store.register_late_pass(|_| Box::new(missing_security_doc::DocMarkdown));
+    store.register_late_pass(|_| Box::new(missing_transactional::MissingTransactional));
     store.register_late_pass(|_| Box::new(no_panics::Panics::new()));
 }
 
