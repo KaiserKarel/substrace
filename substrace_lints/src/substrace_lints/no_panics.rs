@@ -58,7 +58,7 @@ impl ToString for RequiredAttributes {
 }
 
 fn format_help(diff: EnumSet<RequiredAttributes>) -> String {
-    let mut help = String::from("#[warn(\n");
+    let mut help = String::from("#![warn(\n");
     for item in diff {
         help.push_str(&format!("    clippy::{},\n", item.to_string()));
     }
