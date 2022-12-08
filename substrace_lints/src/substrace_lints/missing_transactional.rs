@@ -1,5 +1,5 @@
 use substrace_utils::diagnostics::{span_lint_and_help, span_lint_and_sugg};
-use substrace_utils::source::first_line_of_span;
+use substrace_utils::source::{first_line_of_span, snippet_opt};
 use itertools::Itertools;
 use rustc_ast::ast::{AttrKind, Attribute};
 use rustc_ast::token::CommentKind;
@@ -35,7 +35,7 @@ impl<'tcx> LateLintPass<'tcx> for MissingTransactional {
         if let hir::ItemKind::Impl(impl_block) = item.kind {
             for impl_item in impl_block.items.into_iter() {
                 if let Some(hir::Node::ImplItem(item_in_impl)) = cx.tcx.hir().find(impl_item.id.hir_id()) //Using RFC-2497 if-let-chain syntax
-                    && let hir::ImplItemKind::Fn(_, body_id) = &item_in_impl.kind
+                    && let hir::ImplItemKind::Fn(fn_sig, body_id) = &item_in_impl.kind
                     && let fn_body_in_impl = cx.tcx.hir().find(body_id.hir_id) // Body of function in impl block
                     && let Some(hir::Node::Expr(body_expr)) = fn_body_in_impl
                     && let hir::ExprKind::Block(body_block, _) = body_expr.kind  
@@ -48,8 +48,20 @@ impl<'tcx> LateLintPass<'tcx> for MissingTransactional {
 
                     // Now check if with_transaction function is missing
                     for segment in path.segments {
-                        if segment.ident.as_str() != "with_transaction" {
-                            println!("MISSING TRANSACTIONAL MACRO ON FUNCTION {:?}", this_fn_name_symbol);
+                        if segment.ident.as_str() != "with_transaction" // TODO: Probably use paths lib
+                           && let Some(fn_sig_span_str) = snippet_opt(cx, fn_sig.span) {
+
+                            let suggestion = format!("#[transactional]
+        {fn_sig_span_str}");
+                            span_lint_and_sugg(
+                                cx,
+                                MISSING_TRANSACTIONAL,
+                                fn_sig.span,
+                                "Missing #[transactional] on extrinsic",
+                                "Add the #[transactional] macro to the top of your extrinsic definition",
+                                suggestion,
+                                Applicability::MachineApplicable, // Suggestion can be applied automatically
+                            );
                             break;
                         }
                     }
