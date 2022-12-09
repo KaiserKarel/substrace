@@ -1,5 +1,7 @@
+use super::auxiliary::paths;
 use substrace_utils::diagnostics::{span_lint_and_help, span_lint_and_sugg};
 use substrace_utils::source::{first_line_of_span, snippet_opt};
+use substrace_utils::match_def_path;
 use itertools::Itertools;
 use rustc_ast::ast::{AttrKind, Attribute};
 use rustc_ast::token::CommentKind;
@@ -36,35 +38,32 @@ impl<'tcx> LateLintPass<'tcx> for MissingTransactional {
             for impl_item in impl_block.items.into_iter() {
                 if let Some(hir::Node::ImplItem(item_in_impl)) = cx.tcx.hir().find(impl_item.id.hir_id()) //Using RFC-2497 if-let-chain syntax
                     && let hir::ImplItemKind::Fn(fn_sig, body_id) = &item_in_impl.kind
+                    && let this_fn_name_symbol = item_in_impl.ident.name 
+                    && is_extrinsic_name(this_fn_name_symbol, cx, item) // TODO: Vanaf hieronder moet alles dus kloppen!
+
                     && let fn_body_in_impl = cx.tcx.hir().find(body_id.hir_id) // Body of function in impl block
                     && let Some(hir::Node::Expr(body_expr)) = fn_body_in_impl
-                    && let hir::ExprKind::Block(body_block, _) = body_expr.kind  
+                    && let hir::ExprKind::Block(body_block, _) = body_expr.kind   // TODO: What if it isn't a block? We should use || here I think.
                     && let Some(block_expr) = body_block.expr 
                     && let hir::ExprKind::Call(call_expr, _) = block_expr.kind 
                     && let hir::ExprKind::Path(qpath) = &call_expr.kind 
                     && let hir::QPath::Resolved(_, path) = qpath
-                    && let this_fn_name_symbol = item_in_impl.ident.name // Name Symbol of final expression in Block of the function body
-                    && is_extrinsic_name(this_fn_name_symbol, cx, item) {
+                    && let hir::def::Res::Def(_, def_id) = path.res
+                    && !match_def_path(cx, def_id, &paths::WITH_TRANSACTION) // Now check if with_transaction function is missing
+                    && let Some(fn_sig_span_str) = snippet_opt(cx, fn_sig.span) {
 
-                    // Now check if with_transaction function is missing
-                    for segment in path.segments {
-                        if segment.ident.as_str() != "with_transaction" // TODO: Probably use paths lib
-                           && let Some(fn_sig_span_str) = snippet_opt(cx, fn_sig.span) {
-
-                            let suggestion = format!("#[transactional]
+                    let suggestion = format!("#[transactional]
         {fn_sig_span_str}");
-                            span_lint_and_sugg(
-                                cx,
-                                MISSING_TRANSACTIONAL,
-                                fn_sig.span,
-                                "Missing #[transactional] on extrinsic",
-                                "Add the #[transactional] macro to the top of your extrinsic definition",
-                                suggestion,
-                                Applicability::MachineApplicable, // Suggestion can be applied automatically
-                            );
-                            break;
-                        }
-                    }
+                    span_lint_and_sugg(
+                        cx,
+                        MISSING_TRANSACTIONAL,
+                        fn_sig.span,
+                        "Missing #[transactional] on extrinsic",
+                        "Add the #[transactional] macro to the top of your extrinsic definition",
+                        suggestion,
+                        Applicability::MachineApplicable, // Suggestion can be applied automatically
+                    );
+                    break;
                 }
             }
         }
@@ -97,6 +96,8 @@ pub fn is_extrinsic_name<'tcx>(func_name_symbol: rustc_span::symbol::Symbol, cx:
                         && let Some(block_expr) = body_block.expr
                         && let hir::ExprKind::AddrOf(_, _, ref_expr) = block_expr.kind
                         && let hir::ExprKind::Array(extrinsic_name_exprs) = ref_expr.kind {
+
+                        println!("Item_ref: {:?}", item_ref); // TODO: This path is of course different every time, since the path to get_call_names depends on the pallet you're in...
 
                         for extrinsic_name_expr in extrinsic_name_exprs.into_iter() { // Check for each extrinsic whether func_name_symbol is in it
                             if let hir::ExprKind::Lit(spanned) = &extrinsic_name_expr.kind
