@@ -109,6 +109,7 @@ pub fn get_index_in_expansion<'tcx>(func_name_symbol: rustc_span::symbol::Symbol
 }
 
 // Check if func_name_symbol is in the list of functions created by pallet::call macro that are exposed as extrinsics
+// TODO: This is also used by missing_transactional. Should probably be moved to some other helper functions place?
 pub fn is_extrinsic_name<'tcx>(func_name_symbol: rustc_span::symbol::Symbol, cx: &LateContext<'tcx>) -> bool {
     for item_id_ in cx.tcx.hir().root_module().item_ids.into_iter() { // Gets entire file
         if let Some(hir::Node::Item(parent_node)) = cx.tcx.hir().find(item_id_.hir_id())

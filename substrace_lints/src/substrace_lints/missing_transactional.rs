@@ -48,7 +48,7 @@ impl<'tcx> LateLintPass<'tcx> for MissingTransactional {
             && is_extrinsic_name(name, cx) {
 
             // If it uses a with_transaction function as final expression, then no flag.
-            if let hir::ExprKind::Block(body_block, _) = fn_body.value.kind //TODO: Is this always a block?
+            if let hir::ExprKind::Block(body_block, _) = fn_body.value.kind
                 && let Some(block_expr) = body_block.expr 
                 && let hir::ExprKind::Call(call_expr, _) = block_expr.kind 
                 && let hir::ExprKind::Path(qpath) = &call_expr.kind 
