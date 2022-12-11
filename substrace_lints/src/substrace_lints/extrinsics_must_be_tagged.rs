@@ -68,7 +68,7 @@ pub fn get_index_in_macro<'tcx>(cx: &LateContext<'tcx>, fn_sig: &hir::FnSig<'tcx
     let new_span = span_extend_prev_str(cx, fn_sig.span, "#[pallet::call_index(")?;
     let snip = snippet_opt(cx, new_span)?;
 
-    (&snip[1..]).split(')').next()?.parse::<u8>().ok() // Removes first character ('(') and parses number until closing parenthesis
+    snip.get(1..)?.split(')').next()?.parse::<u8>().ok() // Removes first character ('(') and parses number until closing parenthesis
 }
 
 // Gets call index for extrinsic from code expanded by pallet::call macro
