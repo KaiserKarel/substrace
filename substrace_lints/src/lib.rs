@@ -11,6 +11,7 @@
 #![feature(once_cell)]
 #![feature(rustc_private)]
 #![feature(stmt_expr_attributes)]
+#![feature(is_some_and)]
 #![recursion_limit = "512"]
 #![cfg_attr(feature = "deny-warnings", deny(warnings))]
 #![allow(clippy::missing_docs_in_private_items, clippy::must_use_candidate)]
