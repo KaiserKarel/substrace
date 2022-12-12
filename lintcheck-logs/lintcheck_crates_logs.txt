@@ -1,0 +1,17 @@
+Starting Substrace...
+substrace 0.2.0
+
+### Reports
+
+target/lintcheck/sources/my-substrate-node-template-07a9dc2/node/build.rs:1:1 panics "substrace: clippy must be configured to warn or deny about any panicking code!"
+target/lintcheck/sources/my-substrate-node-template-07a9dc2/runtime/build.rs:1:1 panics "substrace: clippy must be configured to warn or deny about any panicking code!"
+
+
+### Stats:
+
+| lint                                               | count |
+| -------------------------------------------------- | ----- |
+| panics                                             |     2 |
+
+
+### ICEs:

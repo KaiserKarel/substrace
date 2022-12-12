@@ -1,5 +1,6 @@
 [alias]
 uitest = "test --test compile-test"
+lintcheck = "run --package lintcheck --bin lintcheck --manifest-path lintcheck/Cargo.toml  -- "
 
 [build]
 # -Zbinary-dep-depinfo allows us to track which rlib files to use for compiling UI tests
