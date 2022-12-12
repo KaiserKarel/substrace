@@ -27,8 +27,6 @@ semver = "1.0"
 rustc_tools_util = "0.2.0"
 tempfile = { version = "3.2", optional = true }
 termize = "0.1"
-syn = { version = "1.0", features = ["full"] } # are these necessary?
-quote = "1.0" # TODO: Are these necessary?
 
 [dev-dependencies]
 compiletest_rs = { version = "0.8", features = ["tmp"] }

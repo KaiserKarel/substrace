@@ -63,7 +63,7 @@ impl<'tcx> LateLintPass<'tcx> for ExtrinsicsMustBeTagged {
     }
 }
 
-//It checks if text above the function signature contains a call_index macro call.
+//Checks if the text above the function signature contains a call_index macro call.
 pub fn get_index_in_macro<'tcx>(cx: &LateContext<'tcx>, fn_sig: &hir::FnSig<'tcx>) -> Option<u8> {
     let new_span = span_extend_prev_str(cx, fn_sig.span, "#[pallet::call_index(")?;
     let snip = snippet_opt(cx, new_span)?;
