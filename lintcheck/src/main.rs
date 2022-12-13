@@ -342,6 +342,8 @@ impl Crate {
             vec!["--", "--message-format=json", "--"]
         };
 
+        println!("cargo args: {:?}", cargo_substrace_args);
+
         let mut substrace_args = Vec::<&str>::new();
         if let Some(options) = &self.options {
             for opt in options {
@@ -359,6 +361,8 @@ impl Crate {
             substrace_args.extend(lint_filter.iter().map(std::string::String::as_str));
         }
 
+        println!("Ihm: {:?}", substrace_args);
+
         if let Some(server) = server {
             let target = shared_target_dir.join("recursive");
 
@@ -372,7 +376,7 @@ impl Crate {
             // (see `crate::driver`)
             let status = Command::new("cargo")
                 .arg("check")
-                .arg("--quiet")
+                // .arg("--quiet")
                 .current_dir(&self.path)
                 .env("SUBSTRACE_ARGS", substrace_args.join("__SUBSTRACE_HACKERY__"))
                 .env("CARGO_TARGET_DIR", target)
@@ -388,6 +392,8 @@ impl Crate {
 
             return Vec::new();
         }
+
+        println!("cargo check happened");
 
         cargo_substrace_args.extend(substrace_args);
 
@@ -408,12 +414,16 @@ impl Crate {
         let stderr = String::from_utf8_lossy(&all_output.stderr);
         let status = &all_output.status;
 
+        println!("stdout: {:?}\n\n stderr: {:?}\n\n status: {:?}", stdout, stderr, status);
+
         if !status.success() {
             eprintln!(
                 "\nWARNING: bad exit status after checking {} {} \n",
                 self.name, self.version
             );
         }
+
+        println!("Bad exit status should already have occurred");
 
         if config.fix {
             if let Some(stderr) = stderr
@@ -560,7 +570,7 @@ fn main() {
     let config = LintcheckConfig::new();
 
     println!("Compiling substrace...");
-    // build_substrace();
+    build_substrace();
     println!("Done compiling");
 
     let cargo_substrace_path = fs::canonicalize(format!("target/debug/cargo-substrace{EXE_SUFFIX}")).unwrap();
