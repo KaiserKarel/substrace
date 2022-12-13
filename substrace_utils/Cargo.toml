@@ -3,7 +3,7 @@ name = "substrace_utils"
 version = "0.2.0"
 edition = "2021"
 publish = true
-description = "substrace_utils"
+description = "Utility subcrate for substrace"
 license = "MIT"
 
 [dependencies]
