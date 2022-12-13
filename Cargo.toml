@@ -9,8 +9,14 @@ keywords = ["substrace", "lint", "plugin"]
 categories = ["development-tools", "development-tools::cargo-plugins"]
 build = "build.rs"
 edition = "2021"
-publish = false
+publish = true
 default-run = "cargo-substrace"
+
+[workspace]
+members = [
+    "substrace_lints",
+    "substrace_utils"
+]
 
 [[bin]]
 name = "cargo-substrace"

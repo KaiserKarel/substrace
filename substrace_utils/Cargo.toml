@@ -1,8 +1,10 @@
 [package]
 name = "substrace_utils"
-version = "0.1.65"
+version = "0.2.0"
 edition = "2021"
-publish = false
+publish = true
+description = "substrace_utils"
+license = "MIT"
 
 [dependencies]
 arrayvec = { version = "0.7", default-features = false }
