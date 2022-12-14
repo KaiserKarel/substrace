@@ -423,6 +423,7 @@ impl Crate {
                 "\nWARNING: bad exit status after checking {} {} \n",
                 self.name, self.version
             );
+            panic!("Bad exit status");
         }
 
         println!("Bad exit status should already have occurred");
@@ -554,7 +555,7 @@ fn main() -> ExitCode {
     // assert that we launch lintcheck from the repo root (via cargo lintcheck)
     if std::fs::metadata("substrace_lintcheck/Cargo.toml").is_err() {
         eprintln!("lintcheck needs to be run from substrace's repo root!\nUse `cargo lintcheck` alternatively.");
-        std::process::exit(3);
+        ExitCode::from(3);
     }
 
     let config = LintcheckConfig::new();
@@ -619,7 +620,7 @@ fn main() -> ExitCode {
             "ERROR: could not find crate '{}' in lintcheck/lintcheck_crates.toml",
             config.only.unwrap(),
         );
-        std::process::exit(1);
+        return ExitCode::from(1);
     }
 
     // run parallel with rayon
