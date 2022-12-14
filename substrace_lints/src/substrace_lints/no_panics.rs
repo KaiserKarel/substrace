@@ -109,7 +109,7 @@ impl<'hir> LateLintPass<'hir> for Panics {
                 cx,
                 PANICS,
                 span,
-                "substrace: clippy must be configured to warn or deny about any panicking code!",
+                "substrace: clippy must be configured to warn or deny about any panicking code TODOTODO",
                 "insert attributes at the root of the crate",
                 suggestion,
                 Applicability::MachineApplicable,

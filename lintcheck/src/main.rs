@@ -572,7 +572,7 @@ fn main() {
     let config = LintcheckConfig::new();
 
     println!("Compiling substrace...");
-    build_substrace();
+    // build_substrace();
     println!("Done compiling");
 
     let cargo_substrace_path = fs::canonicalize(format!("target/debug/cargo-substrace{EXE_SUFFIX}")).unwrap();

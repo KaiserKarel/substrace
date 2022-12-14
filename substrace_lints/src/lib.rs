@@ -216,12 +216,12 @@ pub fn read_conf(sess: &Session) -> Conf {
 pub fn register_plugins(store: &mut rustc_lint::LintStore, sess: &Session, conf: &Conf) {
 
     // Allows to enable or disable lints in code
-    store.register_lints(&[no_panics::PANICS]);
+    // store.register_lints(&[no_panics::PANICS]);
 
     store.register_late_pass(|_| Box::new(extrinsics_must_be_tagged::ExtrinsicsMustBeTagged));
     store.register_late_pass(|_| Box::new(missing_security_doc::DocMarkdown));
     store.register_late_pass(|_| Box::new(missing_transactional::MissingTransactional));
-    store.register_late_pass(|_| Box::new(no_panics::Panics::new()));
+    // store.register_late_pass(|_| Box::new(no_panics::Panics::new()));
 }
 
 // only exists to let the dogfood integration test works.
