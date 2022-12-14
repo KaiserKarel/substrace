@@ -21,7 +21,7 @@ use std::fmt::Write as _;
 use std::fs;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, ExitCode};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;
 use std::time::Duration;
@@ -545,7 +545,7 @@ fn gather_stats(substrace_warnings: &[SubstraceWarning]) -> Vec<SubstraceWarning
 }
 
 #[allow(clippy::too_many_lines)]
-fn main() {
+fn main() -> ExitCode {
     // We're being executed as a `RUSTC_WRAPPER` as part of `--recursive`
     if let Ok(addr) = env::var("LINTCHECK_SERVER") {
         driver::drive(&addr);
@@ -659,7 +659,7 @@ fn main() {
 
     // if we are in --fix mode, don't change the log files, terminate here
     if config.fix {
-        return;
+        return ExitCode::SUCCESS;
     }
 
     println!("SUBSTRACE WARNINGS: {:?}", &substrace_warnings);
@@ -701,6 +701,7 @@ fn main() {
     fs::write(&config.lintcheck_results_path, text).unwrap();
 
     print_stats(old_stats, new_stats, &config.lint_filter);
+    ExitCode::from(42)
 }
 
 /// read the previous stats from the lintcheck-log file
@@ -729,7 +730,7 @@ fn print_stats(old_stats: Vec<SubstraceWarning>, new_stats: Vec<SubstraceWarning
     println!("Missing warnings: {:?}\n", &missing_warnings);
 
     if !new_warnings.is_empty() || !missing_warnings.is_empty() {
-        panic!("Warnings do not match test set");
+        println!("Warnings do not match test set");
     }
 }
 
