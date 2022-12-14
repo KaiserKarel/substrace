@@ -21,6 +21,8 @@ jobs:
         components: clippy
     - name: Build
       run: cargo build --verbose
+    - name: Lintcheck
+      run: cargo lintcheck --verbose
     - name: Run tests
       run: cargo test --verbose
     - name: Run clippy
