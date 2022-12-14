@@ -342,16 +342,11 @@ impl Crate {
             vec!["--", "--message-format=json", "--"]
         };
 
-        println!("cargo args: {:?}", cargo_substrace_args);
-
         let mut substrace_args = Vec::<&str>::new();
         if let Some(options) = &self.options {
             for opt in options {
                 substrace_args.push(opt);
             }
-        } else {
-            // TODO: substrace doesn't have these categoires?
-            // substrace_args.extend(["-Wclippy::pedantic", "-Wclippy::cargo"]);
         }
 
         if lint_filter.is_empty() {
@@ -361,18 +356,11 @@ impl Crate {
             substrace_args.extend(lint_filter.iter().map(std::string::String::as_str));
         }
 
-        println!("Uhm: {:?}", substrace_args);
-
         if let Some(server) = server {
-            println!("Is this executed?");
             let target = shared_target_dir.join("recursive");
 
             // `cargo substrace` is a wrapper around `cargo check` that mainly sets `RUSTC_WORKSPACE_WRAPPER` to
             // `substrace-driver`. We do the same thing here with a couple changes:
-            //
-            // `RUSTC_WRAPPER` is used instead of `RUSTC_WORKSPACE_WRAPPER` so that we can lint all crate
-            // dependencies rather than only workspace members
-            // TODO: I set this to `RUSTC_WORKSPACE_WRAPPER` again, since we probably only want to lint the current workspace members
             //
             // The wrapper is set to the `lintcheck` so we can force enable linting and ignore certain crates
             // (see `crate::driver`)
@@ -395,8 +383,6 @@ impl Crate {
             return Vec::new();
         }
 
-        println!("cargo check happened");
-
         cargo_substrace_args.extend(substrace_args);
 
         let all_output = Command::new(&cargo_substrace_path)
@@ -416,17 +402,12 @@ impl Crate {
         let stderr = String::from_utf8_lossy(&all_output.stderr);
         let status = &all_output.status;
 
-        println!("stdout: {:?}\n\n stderr: {:?}\n\n status: {:?}", stdout, stderr, status);
-
         if !status.success() {
             eprintln!(
                 "\nWARNING: bad exit status after checking {} {} \n",
                 self.name, self.version
             );
-            panic!("Bad exit status");
         }
-
-        println!("Bad exit status should already have occurred");
 
         if config.fix {
             if let Some(stderr) = stderr
@@ -578,7 +559,7 @@ fn main() -> ExitCode {
     // flatten into one big list of warnings
 
     let (crates, recursive_options) = read_crates(&config.sources_toml_path);
-    let old_stats = read_stats_from_file(&config.lintcheck_results_path);
+    let old_stats = read_stats_from_file(&config.lintcheck_desired_path);
 
     let counter = AtomicUsize::new(1);
     let lint_filter: Vec<String> = config
@@ -657,8 +638,6 @@ fn main() -> ExitCode {
         return ExitCode::SUCCESS;
     }
 
-    println!("SUBSTRACE WARNINGS: {:?}", &substrace_warnings);
-
     // generate some stats
     let new_stats = gather_stats(&substrace_warnings);
 
@@ -669,33 +648,14 @@ fn main() -> ExitCode {
         .map(|w| (&w.crate_name, &w.message))
         .collect();
 
-    // let mut all_msgs: Vec<String> = substrace_warnings
-    //     .iter()
-    //     .map(|warn| warn.to_output(config.markdown))
-    //     .collect();
-    // all_msgs.sort();
-    // all_msgs.push("\n\n### Stats:\n\n".into());
-    // all_msgs.push(stats_formatted);
-
-    // save the text into lintcheck-logs/logs.txt
-    // let mut text = substrace_ver; // substrace version number on top
-    // text.push_str("\n### Reports\n\n");
-    // if config.markdown {
-    //     text.push_str("| file | lint | message |\n");
-    //     text.push_str("| --- | --- | --- |\n");
-    // }
-    // write!(text, "{}", all_msgs.join("")).unwrap();
-    // text.push_str("\n\n### ICEs:\n");
-    // for (cratename, msg) in &ices {
-    //     let _ = write!(text, "{cratename}: '{msg}'");
-    // }
-    let text = serde_json::to_string(&substrace_warnings).unwrap(); //TODO: Remove unwrap
-
-    println!("Writing logs to {}", config.lintcheck_results_path.display());
-    fs::create_dir_all(config.lintcheck_results_path.parent().unwrap()).unwrap();
-
-    // Toggle this line to bless the desired warnings. 
-    // fs::write(&config.lintcheck_results_path, text).unwrap();
+    
+    if let Ok(new_warnings_string) = serde_json::to_string(&substrace_warnings) {
+        println!("Writing logs to {}", config.lintcheck_results_path.display());
+        fs::create_dir_all(config.lintcheck_results_path.parent().unwrap()).unwrap();
+        fs::write(&config.lintcheck_results_path, new_warnings_string).unwrap();
+    } else {
+        eprintln!("Failed to serialize new warnings!");
+    }
 
     print_stats_and_exit(old_stats, new_stats, &config.lint_filter)
 }
@@ -721,13 +681,13 @@ fn print_stats_and_exit(old_stats: Vec<SubstraceWarning>, new_stats: Vec<Substra
 
     println!("\nStats:");
 
-    println!("New warnings: {:?}\n", &new_warnings);
+    println!("New warnings: {:#?}\n", &new_warnings.iter().map(|w| w.to_output(true)).collect::<Vec<_>>());
 
-    println!("Missing warnings: {:?}\n", &missing_warnings);
+    println!("Missing warnings: {:#?}\n", &missing_warnings.iter().map(|w| w.to_output(true)).collect::<Vec<_>>());
 
     // If a new warning appeared, or an old warning is not there anymore, manual inspection may be necessary
     if !new_warnings.is_empty() || !missing_warnings.is_empty() {
-        println!("Warnings do not match test set");
+        eprintln!("Warnings do not match test set");
         ExitCode::FAILURE
     } else {
         ExitCode::SUCCESS

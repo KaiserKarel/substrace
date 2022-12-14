@@ -49,8 +49,10 @@ pub(crate) struct LintcheckConfig {
     pub max_jobs: usize,
     /// we read the sources to check from here
     pub sources_toml_path: PathBuf,
-    /// we save the substrace lint results here
+    /// we overwrite the substrace lint results here after every run
     pub lintcheck_results_path: PathBuf,
+    /// these are the desired substrace lint warnings that are compared to the actual results
+    pub lintcheck_desired_path: PathBuf,
     /// Check only a specified package
     pub only: Option<String>,
     /// whether to just run --fix and not collect all the warnings
@@ -84,8 +86,12 @@ impl LintcheckConfig {
         // wasd.toml, use "wasd"...)
         let filename: PathBuf = sources_toml_path.file_stem().unwrap().into();
         let lintcheck_results_path = PathBuf::from(format!(
-            "lintcheck-logs/{}_logs.{}",
-            filename.display(),
+            "lintcheck-logs/lintcheck_crates_results.{}",
+            if markdown { "md" } else { "txt" }
+        ));
+
+        let lintcheck_desired_path = PathBuf::from(format!(
+            "lintcheck-logs/lintcheck_crates_desired.{}",
             if markdown { "md" } else { "txt" }
         ));
 
@@ -120,6 +126,7 @@ impl LintcheckConfig {
         LintcheckConfig {
             max_jobs,
             sources_toml_path,
+            lintcheck_desired_path,
             lintcheck_results_path,
             only: clap_config.get_one::<String>("only").map(String::from),
             fix: clap_config.contains_id("fix"),

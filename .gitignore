@@ -34,3 +34,6 @@ helper.txt
 *.iml
 .vscode
 .idea
+
+# lintcheck log files
+lintcheck-logs/lintcheck_crates_results.txt
