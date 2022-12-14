@@ -22,7 +22,7 @@ jobs:
     - name: Build
       run: cargo build --verbose
     - name: Lintcheck
-      run: cargo lintcheck --verbose
+      run: cargo lintcheck
     - name: Run tests
       run: cargo test --verbose
     - name: Run clippy
