@@ -18,6 +18,9 @@ members = [
     "substrace_lints",
     "substrace_utils",
 ]
+exclude = [
+    "target/lintcheck/sources/"
+]
 
 [[bin]]
 name = "cargo-substrace"
