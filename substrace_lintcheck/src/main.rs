@@ -695,7 +695,7 @@ fn main() -> ExitCode {
     fs::create_dir_all(config.lintcheck_results_path.parent().unwrap()).unwrap();
 
     // Toggle this line to bless the desired warnings. 
-    fs::write(&config.lintcheck_results_path, text).unwrap();
+    // fs::write(&config.lintcheck_results_path, text).unwrap();
 
     print_stats_and_exit(old_stats, new_stats, &config.lint_filter)
 }
