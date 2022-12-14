@@ -555,7 +555,7 @@ fn main() -> ExitCode {
     // assert that we launch lintcheck from the repo root (via cargo lintcheck)
     if std::fs::metadata("substrace_lintcheck/Cargo.toml").is_err() {
         eprintln!("lintcheck needs to be run from substrace's repo root!\nUse `cargo lintcheck` alternatively.");
-        ExitCode::from(3);
+        return ExitCode::from(3);
     }
 
     let config = LintcheckConfig::new();
