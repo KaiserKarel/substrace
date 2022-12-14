@@ -11,6 +11,7 @@
 #![feature(once_cell)]
 #![feature(rustc_private)]
 #![feature(stmt_expr_attributes)]
+#![feature(is_some_and)]
 #![recursion_limit = "512"]
 #![cfg_attr(feature = "deny-warnings", deny(warnings))]
 #![allow(clippy::missing_docs_in_private_items, clippy::must_use_candidate)]
@@ -154,7 +155,9 @@ mod utils;
 
 mod substrace_lints;
 use substrace_lints::{
+    extrinsics_must_be_tagged,
     missing_security_doc,
+    missing_transactional,
     no_panics,
 };
 
@@ -210,14 +213,15 @@ pub fn read_conf(sess: &Session) -> Conf {
 /// Register all lints and lint groups with the rustc plugin registry
 ///
 /// Used in `./src/driver.rs`.
-#[expect(clippy::too_many_lines)]
 pub fn register_plugins(store: &mut rustc_lint::LintStore, sess: &Session, conf: &Conf) {
 
+    // Allows to enable or disable lints in code
     store.register_lints(&[no_panics::PANICS]);
-    store.register_lints(&[missing_security_doc::MISSING_SECURITY_DOC]);
 
-    store.register_late_pass(|_| Box::new(no_panics::Panics::new()));
+    store.register_late_pass(|_| Box::new(extrinsics_must_be_tagged::ExtrinsicsMustBeTagged));
     store.register_late_pass(|_| Box::new(missing_security_doc::DocMarkdown));
+    store.register_late_pass(|_| Box::new(missing_transactional::MissingTransactional));
+    store.register_late_pass(|_| Box::new(no_panics::Panics::new()));
 }
 
 // only exists to let the dogfood integration test works.
