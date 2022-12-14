@@ -93,7 +93,7 @@ struct Crate {
 }
 
 /// A single warning that substrace issued while checking a `Crate`
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Eq, PartialEq, Clone)]
 struct SubstraceWarning {
     crate_name: String,
     file: String,
@@ -536,30 +536,12 @@ fn read_crates(toml_path: &Path) -> (Vec<CrateSource>, RecursiveOptions) {
 }
 
 /// Generate a short list of occurring lints-types and their count
-fn gather_stats(substrace_warnings: &[SubstraceWarning]) -> (String, HashMap<&String, usize>) {
+fn gather_stats(substrace_warnings: &[SubstraceWarning]) -> Vec<SubstraceWarning> {
     // count lint type occurrences
     let mut counter: HashMap<&String, usize> = HashMap::new();
-    substrace_warnings
-        .iter()
-        .for_each(|wrn| *counter.entry(&wrn.lint_type).or_insert(0) += 1);
 
-    // collect into a tupled list for sorting
-    let mut stats: Vec<(&&String, &usize)> = counter.iter().map(|(lint, count)| (lint, count)).collect();
-    // sort by "000{count} {substrace::lintname}"
-    // to not have a lint with 200 and 2 warnings take the same spot
-    stats.sort_by_key(|(lint, count)| format!("{count:0>4}, {lint}"));
+    substrace_warnings.to_vec()
 
-    let mut header = String::from("| lint                                               | count |\n");
-    header.push_str("| -------------------------------------------------- | ----- |\n");
-    let stats_string = stats
-        .iter()
-        .map(|(lint, count)| format!("| {lint:<50} |  {count:>4} |\n"))
-        .fold(header, |mut table, line| {
-            table.push_str(&line);
-            table
-        });
-
-    (stats_string, counter)
 }
 
 #[allow(clippy::too_many_lines)]
@@ -683,7 +665,7 @@ fn main() {
     println!("SUBSTRACE WARNINGS: {:?}", &substrace_warnings);
 
     // generate some stats
-    let (stats_formatted, new_stats) = gather_stats(&substrace_warnings);
+    let new_stats = gather_stats(&substrace_warnings);
 
     // grab crashes/ICEs, save the crate name and the ice message
     let ices: Vec<(&String, &String)> = substrace_warnings
@@ -692,13 +674,13 @@ fn main() {
         .map(|w| (&w.crate_name, &w.message))
         .collect();
 
-    let mut all_msgs: Vec<String> = substrace_warnings
-        .iter()
-        .map(|warn| warn.to_output(config.markdown))
-        .collect();
-    all_msgs.sort();
-    all_msgs.push("\n\n### Stats:\n\n".into());
-    all_msgs.push(stats_formatted);
+    // let mut all_msgs: Vec<String> = substrace_warnings
+    //     .iter()
+    //     .map(|warn| warn.to_output(config.markdown))
+    //     .collect();
+    // all_msgs.sort();
+    // all_msgs.push("\n\n### Stats:\n\n".into());
+    // all_msgs.push(stats_formatted);
 
     // save the text into lintcheck-logs/logs.txt
     // let mut text = substrace_ver; // substrace version number on top
@@ -722,80 +704,33 @@ fn main() {
 }
 
 /// read the previous stats from the lintcheck-log file
-fn read_stats_from_file(file_path: &Path) -> HashMap<String, usize> {
+fn read_stats_from_file(file_path: &Path) -> Vec<SubstraceWarning> {
     let file_content: String = match std::fs::read_to_string(file_path).ok() {
         Some(content) => content,
         None => {
-            return HashMap::new();
+            return Vec::new();
         },
     };
 
-    let lines: Vec<String> = file_content.lines().map(ToString::to_string).collect();
+    serde_json::from_str(&file_content).unwrap_or(Vec::new())
 
-    // TODO: Why isn't it just saved as json... or auto serialized...
-    lines
-        .iter()
-        .skip_while(|line| line.as_str() != "### Stats:")
-        // Skipping the table header and the `Stats:` label
-        .skip(4)
-        .take_while(|line| line.starts_with("| "))
-        .filter_map(|line| {
-            let mut spl = line.split('|');
-            // Skip the first `|` symbol
-            spl.next();
-            if let (Some(lint), Some(count)) = (spl.next(), spl.next()) {
-                Some((lint.trim().to_string(), count.trim().parse::<usize>().unwrap()))
-            } else {
-                None
-            }
-        })
-        .collect::<HashMap<String, usize>>()
 }
 
 /// print how lint counts changed between runs
-fn print_stats(old_stats: HashMap<String, usize>, new_stats: HashMap<&String, usize>, lint_filter: &Vec<String>) {
-    let same_in_both_hashmaps = old_stats
-        .iter()
-        .filter(|(old_key, old_val)| new_stats.get::<&String>(old_key) == Some(old_val))
-        .map(|(k, v)| (k.to_string(), *v))
-        .collect::<Vec<(String, usize)>>();
-
-    let mut old_stats_deduped = old_stats;
-    let mut new_stats_deduped = new_stats;
-
-    // remove duplicates from both hashmaps
-    for (k, v) in &same_in_both_hashmaps {
-        assert!(old_stats_deduped.remove(k) == Some(*v));
-        assert!(new_stats_deduped.remove(k) == Some(*v));
-    }
+fn print_stats(old_stats: Vec<SubstraceWarning>, new_stats: Vec<SubstraceWarning>, lint_filter: &Vec<String>) {
+    // TODO: This is O(n^2) while we can first sort and then traverse in O(n log n)
+    let new_warnings: Vec<_> = new_stats.iter().filter(|s| !old_stats.contains(&s)).collect(); // new_stats - old_stats
+    let missing_warnings: Vec<_> = old_stats.iter().filter(|s| !new_stats.contains(&s)).collect(); //old_stats - new_stats
 
     println!("\nStats:");
 
-    // list all new counts  (key is in new stats but not in old stats)
-    new_stats_deduped
-        .iter()
-        .filter(|(new_key, _)| old_stats_deduped.get::<str>(new_key).is_none())
-        .for_each(|(new_key, new_value)| {
-            println!("{new_key} 0 => {new_value}");
-        });
+    println!("New warnings: {:?}\n", &new_warnings);
 
-    // list all changed counts (key is in both maps but value differs)
-    new_stats_deduped
-        .iter()
-        .filter(|(new_key, _new_val)| old_stats_deduped.get::<str>(new_key).is_some())
-        .for_each(|(new_key, new_val)| {
-            let old_val = old_stats_deduped.get::<str>(new_key).unwrap();
-            println!("{new_key} {old_val} => {new_val}");
-        });
+    println!("Missing warnings: {:?}\n", &missing_warnings);
 
-    // list all gone counts (key is in old status but not in new stats)
-    old_stats_deduped
-        .iter()
-        .filter(|(old_key, _)| new_stats_deduped.get::<&String>(old_key).is_none())
-        .filter(|(old_key, _)| lint_filter.is_empty() || lint_filter.contains(old_key))
-        .for_each(|(old_key, old_value)| {
-            println!("{old_key} {old_value} => 0");
-        });
+    if !new_warnings.is_empty() || !missing_warnings.is_empty() {
+        panic!("Warnings do not match test set");
+    }
 }
 
 /// Create necessary directories to run the lintcheck tool.
