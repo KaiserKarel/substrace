@@ -700,8 +700,7 @@ fn main() -> ExitCode {
     fs::create_dir_all(config.lintcheck_results_path.parent().unwrap()).unwrap();
     fs::write(&config.lintcheck_results_path, text).unwrap();
 
-    print_stats(old_stats, new_stats, &config.lint_filter);
-    ExitCode::from(42)
+    print_stats_and_exit(old_stats, new_stats, &config.lint_filter)
 }
 
 /// read the previous stats from the lintcheck-log file
@@ -718,7 +717,7 @@ fn read_stats_from_file(file_path: &Path) -> Vec<SubstraceWarning> {
 }
 
 /// print how lint counts changed between runs
-fn print_stats(old_stats: Vec<SubstraceWarning>, new_stats: Vec<SubstraceWarning>, lint_filter: &Vec<String>) {
+fn print_stats_and_exit(old_stats: Vec<SubstraceWarning>, new_stats: Vec<SubstraceWarning>, lint_filter: &Vec<String>) -> ExitCode {
     // TODO: This is O(n^2) while we can first sort and then traverse in O(n log n)
     let new_warnings: Vec<_> = new_stats.iter().filter(|s| !old_stats.contains(&s)).collect(); // new_stats - old_stats
     let missing_warnings: Vec<_> = old_stats.iter().filter(|s| !new_stats.contains(&s)).collect(); //old_stats - new_stats
@@ -729,8 +728,12 @@ fn print_stats(old_stats: Vec<SubstraceWarning>, new_stats: Vec<SubstraceWarning
 
     println!("Missing warnings: {:?}\n", &missing_warnings);
 
+    // If a new warning appeared, or an old warning is not there anymore, manual inspection may be necessary
     if !new_warnings.is_empty() || !missing_warnings.is_empty() {
         println!("Warnings do not match test set");
+        ExitCode::FAILURE
+    } else {
+        ExitCode::SUCCESS
     }
 }
 
