@@ -14,8 +14,10 @@ default-run = "cargo-substrace"
 
 [workspace]
 members = [
+    "substrace_declare_lint",
+    "substrace_lintcheck",
     "substrace_lints",
-    "substrace_utils"
+    "substrace_utils",
 ]
 
 [[bin]]

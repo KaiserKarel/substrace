@@ -41,9 +41,6 @@ use rustc_lint::LintId;
 use rustc_semver::RustcVersion;
 use rustc_session::{Session};
 
-#[macro_use]
-extern crate substrace_declare_substrace_lint;
-
 #[cfg(feature = "internal")]
 pub mod deprecated_lints;
 #[cfg_attr(feature = "internal", allow(clippy::missing_clippy_version_attribute))]

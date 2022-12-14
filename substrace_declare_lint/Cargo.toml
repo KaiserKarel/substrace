@@ -1,7 +1,9 @@
 [package]
-name = "substrace_declare_substrace_lint"
+name = "substrace_declare_lint"
 version = "0.2.0"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Macro for declaring substrace lints"
 publish = true
 
 [lib]

@@ -93,7 +93,7 @@ struct Crate {
 }
 
 /// A single warning that substrace issued while checking a `Crate`
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 struct SubstraceWarning {
     crate_name: String,
     file: String,
@@ -570,7 +570,7 @@ fn main() {
     }
 
     // assert that we launch lintcheck from the repo root (via cargo lintcheck)
-    if std::fs::metadata("lintcheck/Cargo.toml").is_err() {
+    if std::fs::metadata("substrace_lintcheck/Cargo.toml").is_err() {
         eprintln!("lintcheck needs to be run from substrace's repo root!\nUse `cargo lintcheck` alternatively.");
         std::process::exit(3);
     }
@@ -701,17 +701,18 @@ fn main() {
     all_msgs.push(stats_formatted);
 
     // save the text into lintcheck-logs/logs.txt
-    let mut text = substrace_ver; // substrace version number on top
-    text.push_str("\n### Reports\n\n");
-    if config.markdown {
-        text.push_str("| file | lint | message |\n");
-        text.push_str("| --- | --- | --- |\n");
-    }
-    write!(text, "{}", all_msgs.join("")).unwrap();
-    text.push_str("\n\n### ICEs:\n");
-    for (cratename, msg) in &ices {
-        let _ = write!(text, "{cratename}: '{msg}'");
-    }
+    // let mut text = substrace_ver; // substrace version number on top
+    // text.push_str("\n### Reports\n\n");
+    // if config.markdown {
+    //     text.push_str("| file | lint | message |\n");
+    //     text.push_str("| --- | --- | --- |\n");
+    // }
+    // write!(text, "{}", all_msgs.join("")).unwrap();
+    // text.push_str("\n\n### ICEs:\n");
+    // for (cratename, msg) in &ices {
+    //     let _ = write!(text, "{cratename}: '{msg}'");
+    // }
+    let text = serde_json::to_string(&substrace_warnings).unwrap(); //TODO: Remove unwrap
 
     println!("Writing logs to {}", config.lintcheck_results_path.display());
     fs::create_dir_all(config.lintcheck_results_path.parent().unwrap()).unwrap();
@@ -731,6 +732,7 @@ fn read_stats_from_file(file_path: &Path) -> HashMap<String, usize> {
 
     let lines: Vec<String> = file_content.lines().map(ToString::to_string).collect();
 
+    // TODO: Why isn't it just saved as json... or auto serialized...
     lines
         .iter()
         .skip_while(|line| line.as_str() != "### Stats:")

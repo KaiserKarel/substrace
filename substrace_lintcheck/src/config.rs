@@ -73,7 +73,7 @@ impl LintcheckConfig {
         let sources_toml = env::var("LINTCHECK_TOML").unwrap_or_else(|_| {
             clap_config
                 .get_one::<String>("crates-toml")
-                .map_or("lintcheck/lintcheck_crates.toml", |s| &**s)
+                .map_or("substrace_lintcheck/lintcheck_crates.toml", |s| &**s)
                 .into()
         });
 
