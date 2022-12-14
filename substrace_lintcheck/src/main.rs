@@ -769,24 +769,3 @@ fn create_dirs(krate_download_dir: &Path, extract_dir: &Path) {
 fn substrace_project_root() -> &'static Path {
     Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap()
 }
-
-#[test]
-fn lintcheck_test() {
-    let args = [
-        "run",
-        "--target-dir",
-        "lintcheck/target",
-        "--manifest-path",
-        "./lintcheck/Cargo.toml",
-        "--",
-        "--crates-toml",
-        "lintcheck/test_sources.toml",
-    ];
-    let status = std::process::Command::new("cargo")
-        .args(args)
-        .current_dir("..") // repo root
-        .status();
-    //.output();
-
-    assert!(status.unwrap().success());
-}
