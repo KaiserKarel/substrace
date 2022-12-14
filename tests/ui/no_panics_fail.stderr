@@ -1,4 +1,4 @@
-error: substrace: clippy must be configured to warn or deny about any panicking code!
+error: substrace: clippy must be configured to warn or deny about any panicking code
   --> $DIR/no_panics_fail.rs:1:1
    |
 LL | fn main() {}

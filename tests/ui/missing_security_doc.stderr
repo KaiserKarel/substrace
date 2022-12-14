@@ -1,4 +1,4 @@
-error: Twox{64, 128, 256} and Identity are at not secure!
+error: substrace: Twox{64, 128, 256} and Identity are at not secure!
   --> $DIR/missing_security_doc.rs:18:1
    |
 LL | pub type Foo2<K, V> = Bar<Twox64Concat, K, V>;
