@@ -3,12 +3,24 @@ substrace 0.2.0
 
 ### Reports
 
+target/lintcheck/sources/my-substrate-node-template-6247acd/src/lib.rs:101:3 extrinsics_must_be_tagged "substrace: Extrinsic not tagged"
+target/lintcheck/sources/my-substrate-node-template-6247acd/src/lib.rs:101:3 missing_transactional "substrace: Missing #[transactional] on extrinsic"
+target/lintcheck/sources/my-substrate-node-template-6247acd/src/lib.rs:1:1 panics "substrace: clippy must be configured to warn or deny about any panicking code"
+target/lintcheck/sources/my-substrate-node-template-6247acd/src/lib.rs:60:3 extrinsics_must_be_tagged "substrace: Extrinsic not tagged"
+target/lintcheck/sources/my-substrate-node-template-6247acd/src/lib.rs:60:3 missing_transactional "substrace: Missing #[transactional] on extrinsic"
+target/lintcheck/sources/my-substrate-node-template-6247acd/src/lib.rs:78:9 missing_transactional "substrace: Missing #[transactional] on extrinsic"
+target/lintcheck/sources/my-substrate-node-template-6247acd/src/lib.rs:96:3 extrinsics_must_be_tagged "substrace: Extrinsic not tagged"
+target/lintcheck/sources/my-substrate-node-template-6247acd/src/lib.rs:96:3 missing_transactional "substrace: Missing #[transactional] on extrinsic"
+target/lintcheck/sources/richard-test-5f1366b/src/main.rs:1:1 panics "substrace: clippy must be configured to warn or deny about any panicking code"
 
 
 ### Stats:
 
 | lint                                               | count |
 | -------------------------------------------------- | ----- |
+| panics                                             |     2 |
+| extrinsics_must_be_tagged                          |     3 |
+| missing_transactional                              |     4 |
 
 
 ### ICEs:

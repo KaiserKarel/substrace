@@ -442,6 +442,10 @@ impl Crate {
             return Vec::new();
         }
 
+        for i in Message::parse_stream(stdout.as_bytes()).into_iter() {
+            println!("PARSED MESSAGE?: {:?}\n\n", i);
+        }
+
         // get all substrace warnings and ICEs
         let warnings: Vec<SubstraceWarning> = Message::parse_stream(stdout.as_bytes())
             .filter_map(|msg| match msg {
@@ -449,6 +453,8 @@ impl Crate {
                 _ => None,
             })
             .collect();
+
+        println!("WARNINGS HERE: {:?}", warnings);
 
         warnings
     }
@@ -673,6 +679,8 @@ fn main() {
     if config.fix {
         return;
     }
+
+    println!("SUBSTRACE WARNINGS: {:?}", &substrace_warnings);
 
     // generate some stats
     let (stats_formatted, new_stats) = gather_stats(&substrace_warnings);

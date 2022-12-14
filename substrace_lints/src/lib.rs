@@ -39,111 +39,10 @@ extern crate substrace_utils;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_lint::LintId;
 use rustc_semver::RustcVersion;
-use rustc_session::Session;
+use rustc_session::{Session};
 
-/// Macro used to declare a Substrace lint.
-///
-/// Every lint declaration consists of 4 parts:
-///
-/// 1. The documentation, which is used for the website
-/// 2. The `LINT_NAME`. See [lint naming][lint_naming] on lint naming conventions.
-/// 3. The `lint_level`, which is a mapping from *one* of our lint groups to `Allow`, `Warn` or
-///    `Deny`. The lint level here has nothing to do with what lint groups the lint is a part of.
-/// 4. The `description` that contains a short explanation on what's wrong with code where the
-///    lint is triggered.
-///
-/// Currently the categories `style`, `correctness`, `suspicious`, `complexity` and `perf` are
-/// enabled by default. As said in the README.md of this repository, if the lint level mapping
-/// changes, please update README.md.
-///
-/// # Example
-///
-/// ```
-/// #![feature(rustc_private)]
-/// extern crate rustc_session;
-/// use rustc_session::declare_tool_lint;
-/// use substrace_lints::declare_substrace_lint;
-///
-/// declare_substrace_lint! {
-///     /// ### What it does
-///     /// Checks for ... (describe what the lint matches).
-///     ///
-///     /// ### Why is this bad?
-///     /// Supply the reason for linting the code.
-///     ///
-///     /// ### Example
-///     /// ```rust
-///     /// Insert a short example of code that triggers the lint
-///     /// ```
-///     ///
-///     /// Use instead:
-///     /// ```rust
-///     /// Insert a short example of improved code that doesn't trigger the lint
-///     /// ```
-///     pub LINT_NAME,
-///     pedantic,
-///     "description"
-/// }
-/// ```
-/// [lint_naming]: https://rust-lang.github.io/rfcs/0344-conventions-galore.html#lints
-#[macro_export]
-macro_rules! declare_substrace_lint {
-    { $(#[$attr:meta])* pub $name:tt, style, $description:tt } => {
-        declare_tool_lint! {
-            $(#[$attr])* pub substrace::$name, Warn, $description, report_in_external_macro: true
-        }
-    };
-    { $(#[$attr:meta])* pub $name:tt, correctness, $description:tt } => {
-        declare_tool_lint! {
-            $(#[$attr])* pub substrace::$name, Deny, $description, report_in_external_macro: true
-        }
-    };
-    { $(#[$attr:meta])* pub $name:tt, suspicious, $description:tt } => {
-        declare_tool_lint! {
-            $(#[$attr])* pub substrace::$name, Warn, $description, report_in_external_macro: true
-        }
-    };
-    { $(#[$attr:meta])* pub $name:tt, complexity, $description:tt } => {
-        declare_tool_lint! {
-            $(#[$attr])* pub substrace::$name, Warn, $description, report_in_external_macro: true
-        }
-    };
-    { $(#[$attr:meta])* pub $name:tt, perf, $description:tt } => {
-        declare_tool_lint! {
-            $(#[$attr])* pub substrace::$name, Warn, $description, report_in_external_macro: true
-        }
-    };
-    { $(#[$attr:meta])* pub $name:tt, pedantic, $description:tt } => {
-        declare_tool_lint! {
-            $(#[$attr])* pub substrace::$name, Allow, $description, report_in_external_macro: true
-        }
-    };
-    { $(#[$attr:meta])* pub $name:tt, restriction, $description:tt } => {
-        declare_tool_lint! {
-            $(#[$attr])* pub substrace::$name, Allow, $description, report_in_external_macro: true
-        }
-    };
-    { $(#[$attr:meta])* pub $name:tt, cargo, $description:tt } => {
-        declare_tool_lint! {
-            $(#[$attr])* pub substrace::$name, Allow, $description, report_in_external_macro: true
-        }
-    };
-    { $(#[$attr:meta])* pub $name:tt, nursery, $description:tt } => {
-        declare_tool_lint! {
-            $(#[$attr])* pub substrace::$name, Allow, $description, report_in_external_macro: true
-        }
-    };
-    { $(#[$attr:meta])* pub $name:tt, internal, $description:tt } => {
-        declare_tool_lint! {
-            $(#[$attr])* pub substrace::$name, Allow, $description, report_in_external_macro: true
-        }
-    };
-    { $(#[$attr:meta])* pub $name:tt, internal_warn, $description:tt } => {
-        declare_tool_lint! {
-            $(#[$attr])* pub substrace::$name, Warn, $description, report_in_external_macro: true
-        }
-    };
-}
+#[macro_use]
+extern crate substrace_declare_substrace_lint;
 
 #[cfg(feature = "internal")]
 pub mod deprecated_lints;
@@ -216,12 +115,12 @@ pub fn read_conf(sess: &Session) -> Conf {
 pub fn register_plugins(store: &mut rustc_lint::LintStore, sess: &Session, conf: &Conf) {
 
     // Allows to enable or disable lints in code
-    // store.register_lints(&[no_panics::PANICS]);
+    store.register_lints(&[no_panics::PANICS]);
 
     store.register_late_pass(|_| Box::new(extrinsics_must_be_tagged::ExtrinsicsMustBeTagged));
     store.register_late_pass(|_| Box::new(missing_security_doc::DocMarkdown));
     store.register_late_pass(|_| Box::new(missing_transactional::MissingTransactional));
-    // store.register_late_pass(|_| Box::new(no_panics::Panics::new()));
+    store.register_late_pass(|_| Box::new(no_panics::Panics::new()));
 }
 
 // only exists to let the dogfood integration test works.

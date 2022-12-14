@@ -66,7 +66,7 @@ impl<'tcx> LateLintPass<'tcx> for MissingTransactional {
                 cx,
                 MISSING_TRANSACTIONAL,
                 fn_sig.span,
-                "Missing #[transactional] on extrinsic",
+                "substrace: Missing #[transactional] on extrinsic",
                 "Add the #[transactional] macro to the top of your extrinsic definition",
                 suggestion,
                 Applicability::MachineApplicable, // Suggestion can be applied automatically

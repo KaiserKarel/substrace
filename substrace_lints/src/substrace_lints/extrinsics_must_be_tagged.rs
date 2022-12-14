@@ -37,20 +37,11 @@ impl ExtrinsicsMustBeTagged {
 impl<'tcx> LateLintPass<'tcx> for ExtrinsicsMustBeTagged {
     fn check_fn(&mut self,
                 cx: &LateContext<'tcx>,
-                fn_kind: hir::intravisit::FnKind<'tcx>,
+                fn_kind: hir::intravisit::FnKind<'tcx>, //TODO: We don't use the last 4 arguments. Replace with _
                 fn_decl: &'tcx hir::FnDecl<'tcx>,
                 fn_body: &'tcx hir::Body<'tcx>,
                 span: Span,
                 hir_id: hir::hir_id::HirId) {
-                    span_lint_and_sugg(
-                        cx,
-                        EXTRINSICS_MUST_BE_TAGGED,
-                        span,
-                        "Extrinsic not tagged",
-                        "Add the #[pallet::call_index(...)] macro to the top of your extrinsic definition",
-                        String::from(""),
-                        Applicability::MachineApplicable, // Suggestion can be applied automatically
-                    );
         if let hir::intravisit::FnKind::Method(rustc_span::symbol::Ident {name, ..}, fn_sig) = fn_kind 
             && is_extrinsic_name(name, cx)
             && let index = get_index_in_expansion(name, cx)
@@ -63,7 +54,7 @@ impl<'tcx> LateLintPass<'tcx> for ExtrinsicsMustBeTagged {
                 cx,
                 EXTRINSICS_MUST_BE_TAGGED,
                 fn_sig.span,
-                "Extrinsic not tagged",
+                "substrace: Extrinsic not tagged",
                 "Add the #[pallet::call_index(...)] macro to the top of your extrinsic definition",
                 suggestion,
                 Applicability::MachineApplicable, // Suggestion can be applied automatically

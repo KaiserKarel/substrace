@@ -1,7 +1,7 @@
 [crates]
 # some of these are from cargotest
 # puffin = {name = "puffin", git_url = "https://github.com/EmbarkStudios/puffin", git_hash = "02dd4a3"}
-# my-substrate-node-template = {name = "my-substrate-node-template", git_url = "https://github.com/TheCodingWombat/my-substrate-node-template.git", git_hash= "6247acd"}
+my-substrate-node-template = {name = "my-substrate-node-template", git_url = "https://github.com/TheCodingWombat/my-substrate-node-template.git", git_hash= "6247acd"}
 richard-test = {name = "richard-test", git_url = "https://github.com/TheCodingWombat/richard-test.git", git_hash="5f1366b"}
 
 [recursive]
