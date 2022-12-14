@@ -18,7 +18,7 @@ use std::ops::Range;
 
 declare_lint! {
     pub EXTRINSICS_MUST_BE_TAGGED,
-    Deny,
+    Warn,
     "Extrinsics need to be tagged using the pallet::call_index macro to prevent accidental reordering"
 }
 
@@ -37,7 +37,7 @@ impl ExtrinsicsMustBeTagged {
 impl<'tcx> LateLintPass<'tcx> for ExtrinsicsMustBeTagged {
     fn check_fn(&mut self,
                 cx: &LateContext<'tcx>,
-                fn_kind: hir::intravisit::FnKind<'tcx>,
+                fn_kind: hir::intravisit::FnKind<'tcx>, //TODO: We don't use the last 4 arguments. Replace with _
                 fn_decl: &'tcx hir::FnDecl<'tcx>,
                 fn_body: &'tcx hir::Body<'tcx>,
                 span: Span,
@@ -54,7 +54,7 @@ impl<'tcx> LateLintPass<'tcx> for ExtrinsicsMustBeTagged {
                 cx,
                 EXTRINSICS_MUST_BE_TAGGED,
                 fn_sig.span,
-                "Extrinsic not tagged",
+                "substrace: Extrinsic not tagged",
                 "Add the #[pallet::call_index(...)] macro to the top of your extrinsic definition",
                 suggestion,
                 Applicability::MachineApplicable, // Suggestion can be applied automatically

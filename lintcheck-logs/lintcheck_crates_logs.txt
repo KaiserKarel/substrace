@@ -1,0 +1,1 @@
+[{"crate_name":"richard-test","file":"target/lintcheck/sources/richard-test-5f1366b/src/main.rs","line":1,"column":1,"lint_type":"panics","message":"substrace: clippy must be configured to warn or deny about any panicking code","is_ice":false}]

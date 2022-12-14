@@ -1,0 +1,18 @@
+[package]
+name = "substrace_declare_lint"
+version = "0.2.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Macro for declaring substrace lints"
+publish = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+itertools = "0.10.1"
+quote = "1.0.21"
+syn = "1.0.100"
+
+[features]
+deny-warnings = []
