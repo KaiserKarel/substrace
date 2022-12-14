@@ -361,9 +361,10 @@ impl Crate {
             substrace_args.extend(lint_filter.iter().map(std::string::String::as_str));
         }
 
-        println!("Ihm: {:?}", substrace_args);
+        println!("Uhm: {:?}", substrace_args);
 
         if let Some(server) = server {
+            println!("Is this executed?");
             let target = shared_target_dir.join("recursive");
 
             // `cargo substrace` is a wrapper around `cargo check` that mainly sets `RUSTC_WORKSPACE_WRAPPER` to
@@ -371,6 +372,7 @@ impl Crate {
             //
             // `RUSTC_WRAPPER` is used instead of `RUSTC_WORKSPACE_WRAPPER` so that we can lint all crate
             // dependencies rather than only workspace members
+            // TODO: I set this to `RUSTC_WORKSPACE_WRAPPER` again, since we probably only want to lint the current workspace members
             //
             // The wrapper is set to the `lintcheck` so we can force enable linting and ignore certain crates
             // (see `crate::driver`)
@@ -380,7 +382,7 @@ impl Crate {
                 .current_dir(&self.path)
                 .env("SUBSTRACE_ARGS", substrace_args.join("__SUBSTRACE_HACKERY__"))
                 .env("CARGO_TARGET_DIR", target)
-                .env("RUSTC_WRAPPER", env::current_exe().unwrap())
+                .env("RUSTC_WORKSPACE_WRAPPER", env::current_exe().unwrap())
                 // Pass the absolute path so `crate::driver` can find `substrace-driver`, as it's executed in various
                 // different working directories
                 .env("SUBSTRACE_DRIVER", substrace_driver_path)

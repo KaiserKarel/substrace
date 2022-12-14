@@ -1,8 +1,8 @@
 [crates]
 # some of these are from cargotest
 # puffin = {name = "puffin", git_url = "https://github.com/EmbarkStudios/puffin", git_hash = "02dd4a3"}
-my-substrate-node-template = {name = "my-substrate-node-template", git_url = "https://github.com/TheCodingWombat/my-substrate-node-template.git", git_hash= "07a9dc2"}
-# richard-test = {name = "richard-test", git_url = "https://github.com/TheCodingWombat/richard-test.git", git_hash="d4d7a15"}
+my-substrate-node-template = {name = "my-substrate-node-template", git_url = "https://github.com/TheCodingWombat/my-substrate-node-template.git", git_hash= "6247acd"}
+richard-test = {name = "richard-test", git_url = "https://github.com/TheCodingWombat/richard-test.git", git_hash="5f1366b"}
 
 [recursive]
 ignore = [
