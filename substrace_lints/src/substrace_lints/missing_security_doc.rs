@@ -32,34 +32,28 @@ impl DocMarkdown {
 
 impl<'tcx> LateLintPass<'tcx> for DocMarkdown {
     fn check_item(&mut self, cx: &LateContext<'tcx>, item: &'tcx hir::Item<'_>) {
-        if let hir::ItemKind::TyAlias(ty, ..) = item.kind {
-            
-            if let hir::TyKind::Path(hir::QPath::Resolved(_, path)) = ty.kind {
-                
-                if let hir::def::Res::Def(_, id) = path.res { //TODO: This if let can be replaced with normal assignment
-                    if paths::is_like_storage_map(cx, id) {
-                        let attrs = cx.tcx.hir().attrs(item.hir_id());
-                        let headers = check_attrs(cx, &Default::default(), attrs);
-                        if let segments = path.segments { //TODO: This if let can be replaced with normal assignment
-                            for segment in segments {
-                                if let Some(args) = segment.args {
-                                    if paths::is_insecure_hash_function(cx, args) && !headers.security {
-                                        span_lint_and_sugg(
-                                            cx,
-                                            MISSING_SECURITY_DOC,
-                                            item.span,
-                                            "substrace: Twox{64, 128, 256} and Identity are at not secure!",
-                                            "use Blake2, or add a # Security doc comment describing why the usage is correct",
-                                            "/// # Security
-/// Twox64Concat is safe because the ..."
-                                                .to_string(),
-                                            Applicability::HasPlaceholders,
-                                        );
-                                    }
-                                }
-                            }
-                        }
-                    }
+        if let hir::ItemKind::TyAlias(ty, ..) = item.kind
+            && let hir::TyKind::Path(hir::QPath::Resolved(_, path)) = ty.kind
+            && let hir::def::Res::Def(_, id) = path.res
+            && if paths::is_like_storage_map(cx, id)
+            && let attrs = cx.tcx.hir().attrs(item.hir_id())
+            && let headers = check_attrs(cx, &Default::default(), attrs) {
+
+            for segment in path.segments {
+                if let Some(args) = segment.args
+                    && if paths::is_insecure_hash_function(cx, args) && !headers.security {
+                    
+                    span_lint_and_sugg(
+                        cx,
+                        MISSING_SECURITY_DOC,
+                        item.span,
+                        "substrace: Twox{64, 128, 256} and Identity are at not secure!",
+                        "use Blake2, or add a # Security doc comment describing why the usage is correct",
+                        "/// # Security
+    /// Twox64Concat is safe because the ..."
+                            .to_string(),
+                        Applicability::HasPlaceholders,
+                    );
                 }
             }
         }
