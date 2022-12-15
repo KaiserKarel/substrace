@@ -535,12 +535,8 @@ fn main() -> ExitCode {
 
     let config = LintcheckConfig::new();
 
-    println!("Compiling substrace...");
-    // build_substrace();
-    println!("Done compiling");
-
-    let cargo_substrace_path = fs::canonicalize(format!("target/debug/cargo-substrace{EXE_SUFFIX}")).unwrap();
-    let substrace_driver_path = fs::canonicalize(format!("target/debug/substrace-driver{EXE_SUFFIX}")).unwrap();
+    let cargo_substrace_path = fs::canonicalize(format!("target/debug/cargo-substrace{EXE_SUFFIX}")).expect("You need to build substrace first");
+    let substrace_driver_path = fs::canonicalize(format!("target/debug/substrace-driver{EXE_SUFFIX}")).expect("You need to build substrace first");
 
     // assert that substrace is found
     assert!(
