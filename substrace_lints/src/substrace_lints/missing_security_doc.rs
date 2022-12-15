@@ -48,7 +48,7 @@ impl<'tcx> LateLintPass<'tcx> for DocMarkdown {
                                             cx,
                                             MISSING_SECURITY_DOC,
                                             item.span,
-                                            "Twox{64, 128, 256} and Identity are at not secure!",
+                                            "substrace: Twox{64, 128, 256} and Identity are at not secure!",
                                             "use Blake2, or add a # Security doc comment describing why the usage is correct",
                                             "/// # Security
 /// Twox64Concat is safe because the ..."

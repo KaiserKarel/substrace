@@ -14,8 +14,12 @@ default-run = "cargo-substrace"
 
 [workspace]
 members = [
+    "substrace_lintcheck",
     "substrace_lints",
-    "substrace_utils"
+    "substrace_utils",
+]
+exclude = [
+    "target/lintcheck/sources/"
 ]
 
 [[bin]]

@@ -10,7 +10,7 @@ edition = "2021"
 
 [dependencies]
 cargo_metadata = "0.14"
-substrace_utils = { path = "../substrace_utils", version="0.2.0" }
+substrace_utils = { version="0.2.0", path = "../substrace_utils" }
 enumset = "1.0.8"
 if_chain = "1.0"
 itertools = "0.10.1"

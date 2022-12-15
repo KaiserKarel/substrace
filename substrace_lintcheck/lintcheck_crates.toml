@@ -1,0 +1,12 @@
+[crates]
+# some of these are from cargotest
+my-substrate-node-template = {name = "my-substrate-node-template", git_url = "https://github.com/TheCodingWombat/my-substrate-node-template.git", git_hash= "6247acd"}
+richard-test = {name = "richard-test", git_url = "https://github.com/TheCodingWombat/richard-test.git", git_hash="5f1366b"}
+
+[recursive]
+ignore = [
+    # Takes ~30s to lint
+    "combine",
+    # Has 1.2 million `clippy::match_same_arms`shttp
+    "unicode-normalization",
+]

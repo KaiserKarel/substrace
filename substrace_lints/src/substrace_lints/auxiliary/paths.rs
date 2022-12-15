@@ -101,3 +101,5 @@ pub const ITERABLE_STORAGE_DOUBLE_MAP_TRY_MUTATE: [&str; 4] =
     ["frame_support", "storage", "StorageDoubleMap", "try_mutate"];
 pub const ITERABLE_STORAGE_DOUBLE_MAP_TRY_MUTATE_EXISTS: [&str; 4] =
     ["frame_support", "storage", "StorageDoubleMap", "try_mutate_exists"];
+
+pub const WITH_TRANSACTION: [&str; 4] = ["frame_support", "storage", "transactional", "with_transaction"];

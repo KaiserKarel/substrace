@@ -3,6 +3,7 @@ use enumset::{EnumSet, EnumSetType};
 use if_chain::if_chain;
 use rustc_ast::{self as ast, *};
 use rustc_errors::Applicability;
+use substrace_utils::source::snippet_opt;
 
 use rustc_lint::{LateContext, LateLintPass};
 use rustc_session::{declare_lint, impl_lint_pass};
@@ -58,7 +59,7 @@ impl ToString for RequiredAttributes {
 }
 
 fn format_help(diff: EnumSet<RequiredAttributes>) -> String {
-    let mut help = String::from("#[warn(\n");
+    let mut help = String::from("#![warn(\n");
     for item in diff {
         help.push_str(&format!("    clippy::{},\n", item.to_string()));
     }
@@ -96,14 +97,21 @@ impl<'hir> LateLintPass<'hir> for Panics {
     fn check_crate_post(&mut self, cx: &LateContext<'hir>) {
         let diff = EnumSet::<RequiredAttributes>::all().difference(self.seen_attributes);
 
-        if !diff.is_empty() {
+        let span = Span::new(BytePos(0), BytePos(1), SyntaxContext::root(), None);
+
+        if !diff.is_empty()
+            && let Some(span_text) = snippet_opt(cx, span) {
+            
+            let mut suggestion = format_help(diff);
+            suggestion.push_str(&span_text);
+
             span_lint_and_sugg(
                 cx,
                 PANICS,
-                Span::new(BytePos(0), BytePos(1), SyntaxContext::root(), None),
-                "substrace: clippy must be configured to warn or deny about any panicking code!",
+                span,
+                "substrace: clippy must be configured to warn or deny about any panicking code",
                 "insert attributes at the root of the crate",
-                format_help(diff),
+                suggestion,
                 Applicability::MachineApplicable,
             );
         }

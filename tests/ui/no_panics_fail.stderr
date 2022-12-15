@@ -1,4 +1,4 @@
-error: substrace: clippy must be configured to warn or deny about any panicking code!
+error: substrace: clippy must be configured to warn or deny about any panicking code
   --> $DIR/no_panics_fail.rs:1:1
    |
 LL | fn main() {}
@@ -7,13 +7,14 @@ LL | fn main() {}
    = note: `-D panics` implied by `-D warnings`
 help: insert attributes at the root of the crate
    |
-LL + #[warn(
+LL + #![warn(
 LL +     clippy::disallowed_methods,
 LL +     clippy::indexing_slicing,
 LL +     clippy::todo,
 LL +     clippy::unwrap_used,
 LL +     clippy::panic,
 LL + )]
+LL ~ fn main() {}
    |
 
 error: aborting due to previous error
