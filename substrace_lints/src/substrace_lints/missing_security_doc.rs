@@ -2,7 +2,7 @@ use super::auxiliary::paths;
 use substrace_utils::diagnostics::{span_lint_and_help, span_lint_and_sugg};
 use substrace_utils::source::first_line_of_span;
 use itertools::Itertools;
-use rustc_ast::ast::{AttrKind, Attribute};
+use rustc_ast::ast::Attribute;
 use rustc_ast::token::CommentKind;
 use rustc_data_structures::fx::FxHashSet;
 use rustc_errors::Applicability;
@@ -23,12 +23,6 @@ impl_lint_pass!(DocMarkdown => [MISSING_SECURITY_DOC]);
 
 #[derive(Clone, Default)]
 pub struct DocMarkdown;
-
-impl DocMarkdown {
-    pub fn new() -> Self {
-        Self
-    }
-}
 
 impl<'tcx> LateLintPass<'tcx> for DocMarkdown {
     fn check_item(&mut self, cx: &LateContext<'tcx>, item: &'tcx hir::Item<'_>) {
@@ -135,7 +129,7 @@ fn check_attrs<'a>(cx: &LateContext<'_>, valid_idents: &FxHashSet<String>, attrs
 
     for attr in attrs {
         if let Some((comment, comment_kind)) = attr.doc_str_and_comment_kind() {
-            let (comment, current_spans) = strip_doc_comment_decoration(&comment.as_str(), comment_kind, attr.span);
+            let (comment, current_spans) = strip_doc_comment_decoration(comment.as_str(), comment_kind, attr.span);
             spans.extend_from_slice(&current_spans);
             doc.push_str(&comment);
         } else if attr.has_name(sym::doc) {

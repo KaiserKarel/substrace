@@ -7,7 +7,7 @@ use substrace_utils::source::snippet_opt;
 
 use rustc_lint::{LateContext, LateLintPass};
 use rustc_session::{declare_lint, impl_lint_pass};
-use rustc_span::{hygiene::SyntaxContext, symbol::sym, BytePos, Span};
+use rustc_span::{hygiene::SyntaxContext, BytePos, Span};
 use std::str::FromStr;
 
 declare_lint! {
@@ -82,7 +82,7 @@ impl<'hir> LateLintPass<'hir> for Panics {
     fn check_attribute(&mut self, _: &LateContext<'_>, attr: &ast::Attribute) {
         if let Some(items) = &attr.meta_item_list() {
             if let Some(ident) = attr.ident() {
-                let ident = &*ident.as_str();
+                let ident = ident.as_str();
                 if matches!(ident, "warn" | "deny" | "forbid") {
                     items.iter().for_each(|item| {
                         if let Some(attr1) = extract_clippy_lint(item) {
@@ -126,7 +126,7 @@ fn extract_clippy_lint(lint: &NestedMetaItem) -> Option<RequiredAttributes> {
         if tool_name.name.as_str() == "clippy";
         let lint_name = meta_item.path.segments.last().unwrap().ident.name;
         then {
-            return RequiredAttributes::from_str(&lint_name.as_str()).ok();
+            return RequiredAttributes::from_str(lint_name.as_str()).ok();
         }
     }
     None

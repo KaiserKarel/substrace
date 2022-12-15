@@ -1,9 +1,3 @@
-macro_rules! include_lint {
-    ($file_name: expr) => {
-        include_str!($file_name)
-    };
-}
-
 macro_rules! docs {
     ($($lint_name: expr,)*) => {
         pub fn explain(lint: &str) {

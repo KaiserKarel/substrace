@@ -1,20 +1,12 @@
 use super::auxiliary::paths;
-use substrace_utils::diagnostics::{span_lint_and_help, span_lint_and_sugg};
-use substrace_utils::source::{first_line_of_span, snippet_opt, line_span, span_extend_prev_str};
+use substrace_utils::diagnostics::span_lint_and_sugg;
+use substrace_utils::source::{snippet_opt, line_span};
 use substrace_utils::match_def_path;
-use itertools::Itertools;
-use rustc_ast::ast::{AttrKind, Attribute};
-use rustc_ast::AstDeref;
-use rustc_ast::ast as ast;
-use rustc_ast::token::CommentKind;
-use rustc_data_structures::fx::FxHashSet;
 use rustc_errors::Applicability;
 use rustc_hir as hir;
-use rustc_lint::{LateContext, LateLintPass, LintContext};
+use rustc_lint::{LateContext, LateLintPass};
 use rustc_session::{declare_lint, impl_lint_pass};
-use rustc_span::source_map::{BytePos, Span, SourceMap, original_sp};
-use rustc_span::{sym, Pos, DUMMY_SP};
-use std::ops::Range;
+use rustc_span::source_map::Span;
 
 use super::extrinsics_must_be_tagged::is_extrinsic_name;
 
@@ -29,21 +21,15 @@ impl_lint_pass!(MissingTransactional => [MISSING_TRANSACTIONAL]);
 #[derive(Clone, Default)]
 pub struct MissingTransactional;
 
-impl MissingTransactional {
-    pub fn new() -> Self {
-        Self
-    }
-}
-
 // Check if extrinsics use with_transaction
 impl<'tcx> LateLintPass<'tcx> for MissingTransactional {
     fn check_fn(&mut self,
         cx: &LateContext<'tcx>,
         fn_kind: hir::intravisit::FnKind<'tcx>,
-        fn_decl: &'tcx hir::FnDecl<'tcx>,
+        _: &'tcx hir::FnDecl<'tcx>,
         fn_body: &'tcx hir::Body<'tcx>,
-        span: Span,
-        hir_id: hir::hir_id::HirId) {
+        _: Span,
+        _: hir::hir_id::HirId) {
         if let hir::intravisit::FnKind::Method(rustc_span::symbol::Ident {name, ..}, fn_sig) = fn_kind 
             && is_extrinsic_name(name, cx) {
 
