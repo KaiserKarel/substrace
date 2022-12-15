@@ -3,9 +3,9 @@ use substrace_utils::diagnostics::{span_lint_and_help, span_lint_and_sugg};
 use substrace_utils::source::first_line_of_span;
 use itertools::Itertools;
 use rustc_ast::ast::Attribute;
+use rustc_errors::Applicability;
 use rustc_ast::token::CommentKind;
 use rustc_data_structures::fx::FxHashSet;
-use rustc_errors::Applicability;
 use rustc_hir as hir;
 use rustc_lint::{LateContext, LateLintPass};
 use rustc_session::{declare_lint, impl_lint_pass};
@@ -29,13 +29,14 @@ impl<'tcx> LateLintPass<'tcx> for DocMarkdown {
         if let hir::ItemKind::TyAlias(ty, ..) = item.kind
             && let hir::TyKind::Path(hir::QPath::Resolved(_, path)) = ty.kind
             && let hir::def::Res::Def(_, id) = path.res
-            && if paths::is_like_storage_map(cx, id)
-            && let attrs = cx.tcx.hir().attrs(item.hir_id())
-            && let headers = check_attrs(cx, &Default::default(), attrs) {
+            && paths::is_like_storage_map(cx, id) {
+            
+            let attrs = cx.tcx.hir().attrs(item.hir_id());
+            let headers = check_attrs(cx, &Default::default(), attrs);
 
             for segment in path.segments {
                 if let Some(args) = segment.args
-                    && if paths::is_insecure_hash_function(cx, args) && !headers.security {
+                    && paths::is_insecure_hash_function(cx, args) && !headers.security {
                     
                     span_lint_and_sugg(
                         cx,
