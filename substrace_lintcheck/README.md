@@ -1,23 +1,26 @@
-## `cargo lintcheck`
+## `substrace lintcheck`
 
-Runs clippy on a fixed set of crates read from
+Runs substrace on a fixed set of crates read from
 `lintcheck/lintcheck_crates.toml` and saves logs of the lint warnings into the
 repo.  We can then check the diff and spot new or disappearing warnings.
 
 From the repo root, run:
 
 ```
-cargo run --target-dir lintcheck/target --manifest-path lintcheck/Cargo.toml
+cargo run --target-dir substrace_lintcheck/target --manifest-path substrace_lintcheck/Cargo.toml
 ```
 
 or
 
 ```
-cargo lintcheck
+substrace lintcheck
 ```
 
 By default the logs will be saved into
-`lintcheck-logs/lintcheck_crates_logs.txt`.
+`lintcheck-logs/lintcheck_crates_results.txt`.
+
+The desired logs are found at
+`lintcheck-logs/lintcheck_crates_desired.txt`.
 
 You can set a custom sources.toml by adding `--crates-toml custom.toml` or using
 `LINTCHECK_TOML="custom.toml"` where `custom.toml` must be a relative path from
@@ -52,21 +55,6 @@ sources.
    clippy = {name = "clippy", path = "/home/user/clippy"}
    ```
    For when you want to add a repository that is not published yet.
-
-#### Command Line Options (optional)
-
-```toml
-bitflags = {name = "bitflags", versions = ['1.2.1'], options = ['-Wclippy::pedantic', '-Wclippy::cargo']}
-```
-
-It is possible to specify command line options for each crate. This makes it
-possible to only check a crate for certain lint groups. If no options are
-specified, the lint groups `clippy::all`, `clippy::pedantic`, and
-`clippy::cargo` are checked. If an empty array is specified only `clippy::all`
-is checked.
-
-**Note:** `-Wclippy::all` is always enabled by default, unless `-Aclippy::all`
-is explicitly specified in the options.
 
 ### Fix mode
 You can run `cargo lintcheck --fix` which will run Clippy with `--fix` and
