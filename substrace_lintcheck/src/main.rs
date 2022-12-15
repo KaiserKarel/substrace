@@ -675,7 +675,6 @@ fn read_stats_from_file(file_path: &Path) -> Vec<SubstraceWarning> {
 
 /// print how lint counts changed between runs
 fn print_stats_and_exit(old_stats: Vec<SubstraceWarning>, new_stats: Vec<SubstraceWarning>, lint_filter: &Vec<String>) -> ExitCode {
-    // TODO: This is O(n^2) while we can first sort and then traverse in O(n log n)
     let new_warnings: Vec<_> = new_stats.iter().filter(|s| !old_stats.contains(&s)).collect(); // new_stats - old_stats
     let missing_warnings: Vec<_> = old_stats.iter().filter(|s| !new_stats.contains(&s)).collect(); //old_stats - new_stats
 
