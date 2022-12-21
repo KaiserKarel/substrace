@@ -5,7 +5,6 @@
 #![feature(drain_filter)]
 #![feature(iter_intersperse)]
 #![feature(let_chains)]
-#![feature(let_else)]
 #![feature(lint_reasons)]
 #![feature(never_type)]
 #![feature(once_cell)]
@@ -36,9 +35,6 @@ extern crate rustc_span;
 #[macro_use]
 extern crate substrace_utils;
 
-use rustc_data_structures::fx::FxHashSet;
-use rustc_lint::LintId;
-use rustc_semver::RustcVersion;
 use rustc_session::Session;
 
 /// Macro used to declare a Substrace lint.
@@ -164,18 +160,6 @@ use substrace_lints::{
 pub use crate::utils::conf::Conf;
 use crate::utils::conf::{format_error, TryConf};
 
-/// Register all pre expansion lints
-///
-/// Pre-expansion lints run before any macro expansion has happened.
-///
-/// Note that due to the architecture of the compiler, currently `cfg_attr` attributes on crate
-/// level (i.e `#![cfg_attr(...)]`) will still be expanded even when using a pre-expansion pass.
-///
-/// Used in `./src/driver.rs`.
-pub fn register_pre_expansion_lints(store: &mut rustc_lint::LintStore, sess: &Session, conf: &Conf) {
-
-}
-
 #[doc(hidden)]
 pub fn read_conf(sess: &Session) -> Conf {
     let file_name = match utils::conf::lookup_conf_file() {
@@ -191,7 +175,7 @@ pub fn read_conf(sess: &Session) -> Conf {
     let TryConf { conf, errors, warnings } = utils::conf::read(&file_name);
     // all conf errors are non-fatal, we just use the default conf in case of error
     for error in errors {
-        sess.err(&format!(
+        sess.err(format!(
             "error reading Substrace's configuration file `{}`: {}",
             file_name.display(),
             format_error(error)
@@ -213,7 +197,7 @@ pub fn read_conf(sess: &Session) -> Conf {
 /// Register all lints and lint groups with the rustc plugin registry
 ///
 /// Used in `./src/driver.rs`.
-pub fn register_plugins(store: &mut rustc_lint::LintStore, sess: &Session, conf: &Conf) {
+pub fn register_plugins(store: &mut rustc_lint::LintStore, _: &Session, _: &Conf) {
 
     // Allows to enable or disable lints in code
     store.register_lints(&[no_panics::PANICS]);

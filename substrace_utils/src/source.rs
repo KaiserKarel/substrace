@@ -91,23 +91,21 @@ fn span_extend_prev_str_internal(
     //           ^^^^ returned span without the check
     //     ---------- correct span
     let prev_source = source_map.span_to_prev_source(sp).ok()?;
-    for ws in &[" ", "\t", "\n"] {
-        let pat = pat.to_owned();
-        if let Some(pat_pos) = prev_source.rfind(&pat) {
-            let just_after_pat_pos = pat_pos + pat.len() - 1;
-            let just_after_pat_plus_ws = if include_whitespace {
-                just_after_pat_pos
-                    + prev_source[just_after_pat_pos..]
-                        .find(|c: char| !c.is_whitespace())
-                        .unwrap_or(0)
-            } else {
-                just_after_pat_pos
-            };
-            let len = prev_source.len() - just_after_pat_plus_ws;
-            let prev_source = &prev_source[just_after_pat_plus_ws..];
-            if accept_newlines || !prev_source.trim_start().contains('\n') {
-                return Some(sp.with_lo(BytePos(sp.lo().0 - len as u32)));
-            }
+    let pat = pat.to_owned();
+    if let Some(pat_pos) = prev_source.rfind(&pat) {
+        let just_after_pat_pos = pat_pos + pat.len() - 1;
+        let just_after_pat_plus_ws = if include_whitespace {
+            just_after_pat_pos
+                + prev_source[just_after_pat_pos..]
+                    .find(|c: char| !c.is_whitespace())
+                    .unwrap_or(0)
+        } else {
+            just_after_pat_pos
+        };
+        let len = prev_source.len() - just_after_pat_plus_ws;
+        let prev_source = &prev_source[just_after_pat_plus_ws..];
+        if accept_newlines || !prev_source.trim_start().contains('\n') {
+            return Some(sp.with_lo(BytePos(sp.lo().0 - len as u32)));
         }
     }
 

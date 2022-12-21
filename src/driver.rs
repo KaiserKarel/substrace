@@ -111,7 +111,6 @@ impl rustc_driver::Callbacks for SubstraceCallbacks {
 
             let conf = substrace_lints::read_conf(sess);
             substrace_lints::register_plugins(lint_store, sess, &conf);
-            substrace_lints::register_pre_expansion_lints(lint_store, sess, &conf);
         }));
 
         // FIXME: #4825; This is required, because Substrace lints that are based on MIR have to be
