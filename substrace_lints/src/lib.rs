@@ -151,6 +151,7 @@ mod utils;
 
 mod substrace_lints;
 use substrace_lints::{
+    enable_singlepass_benchmarks,
     extrinsics_must_be_tagged,
     missing_security_doc,
     missing_transactional,
@@ -202,6 +203,7 @@ pub fn register_plugins(store: &mut rustc_lint::LintStore, _: &Session, _: &Conf
     // Allows to enable or disable lints in code
     store.register_lints(&[no_panics::PANICS]);
 
+    store.register_early_pass(|| Box::new(enable_singlepass_benchmarks::EnableSinglepassBenchmarks));
     store.register_late_pass(|_| Box::new(extrinsics_must_be_tagged::ExtrinsicsMustBeTagged));
     store.register_late_pass(|_| Box::new(missing_security_doc::DocMarkdown));
     store.register_late_pass(|_| Box::new(missing_transactional::MissingTransactional));
