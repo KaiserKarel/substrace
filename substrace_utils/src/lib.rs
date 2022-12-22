@@ -2357,6 +2357,7 @@ pub fn is_in_test_function(tcx: TyCtxt<'_>, id: hir::HirId) -> bool {
 /// Note: Add `// compile-flags: --test` to UI tests with a `#[cfg(test)]` function
 pub fn is_in_cfg_test(tcx: TyCtxt<'_>, id: hir::HirId) -> bool {
     fn is_cfg_test(attr: &Attribute) -> bool {
+        println!("Attr: {:?}, {:?}", attr, attr.has_name(sym::cfg));
         if attr.has_name(sym::cfg)
             && let Some(items) = attr.meta_item_list()
             && let [item] = &*items
@@ -2367,6 +2368,7 @@ pub fn is_in_cfg_test(tcx: TyCtxt<'_>, id: hir::HirId) -> bool {
             false
         }
     }
+    println!("haha");
     tcx.hir()
         .parent_iter(id)
         .flat_map(|(parent_id, _)| tcx.hir().attrs(parent_id))

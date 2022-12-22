@@ -18,7 +18,7 @@ pulldown-cmark = { version = "0.9", default-features = false }
 quine-mc_cluskey = "0.2"
 regex-syntax = "0.6"
 serde = { version = "1.0", features = ["derive"] }
-serde_json = { version = "1.0", optional = true }
+serde_json = { version = "1.0"}
 tempfile = { version = "3.3.0", optional = true }
 toml = "0.5"
 unicode-normalization = "0.1"
@@ -28,11 +28,12 @@ rustc-semver = "1.1"
 # NOTE: cargo requires serde feat in its url dep
 # see <https://github.com/rust-lang/rust/pull/63587#issuecomment-522343864>
 url = { version = "2.2", features = ["serde"] }
+grep = "0.2"
+termcolor = "1.0.4"
+walkdir = "2.2.7"
 
 [features]
 deny-warnings = ["substrace_utils/deny-warnings"]
-# build substrace with internal lints enabled, off by default
-internal = ["substrace_utils/internal", "serde_json", "tempfile"]
 
 [package.metadata.rust-analyzer]
 # This crate uses #[feature(rustc_private)]
