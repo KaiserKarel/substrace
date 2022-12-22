@@ -46,8 +46,18 @@ struct MyGrepResult {
 
 impl<'tcx> LateLintPass<'tcx> for EnableSinglepassBenchmarks {
 
+    // this doesn't work:  those mod calls are optimized away when not running it with feature "runtime-benchmarks"...
+    // Possible fix: Run substrace with this feature on?
+
+    // Also: the runtime-benchmarks could probably be applied to other items. Not just mod delarations.
+    // Possible fix: Use something like check_item
+    fn check_mod(&mut self, cx: &LateContext<'tcx>, the_mod: &'tcx hir::Mod<'tcx>, _: hir::hir_id::HirId) {
+        println!("Checking mod {:?}", snippet_opt(cx, the_mod.spans.inner_span));
+    }
+
     fn check_crate(&mut self, cx: &LateContext<'tcx>) {
         println!("Checkin crate!");
+        return;
 
 
         let my_str = std::fs::read_to_string("output.jsonl").ok().unwrap();
