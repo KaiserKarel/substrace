@@ -1,4 +1,5 @@
 #![allow(panics)]
+#![allow(enable_singlepass_benchmarks)]
 // aux-build:frame-support.rs
 
 extern crate frame_support;

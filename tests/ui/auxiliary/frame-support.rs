@@ -1,6 +1,7 @@
 // Mocking file structure of frame-support project
 #![allow(panics)]
 #![allow(clippy::result_unit_err)]
+#![allow(enable_singlepass_benchmarks)]
 
 pub mod hash {
     pub struct Twox64Concat;

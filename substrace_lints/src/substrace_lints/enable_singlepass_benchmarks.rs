@@ -51,7 +51,9 @@ impl<'tcx> LateLintPass<'tcx> for EnableSinglepassBenchmarks {
 
     fn check_crate(&mut self, cx: &LateContext<'tcx>) {
 
-        let ripgrep_process_output = run_ripgrep(r#"^#\[cfg\(feature *= *"runtime-benchmarks"\)\]"#, ".");
+        //TODO: Disregard patterns matched in block comments
+        // See this pattern in action: https://regex101.com/r/jd6CX1/4
+        let ripgrep_process_output = run_ripgrep(r#"^(#\[cfg\(any\(((?!test, )[ \w\-="]*, )*feature *= *"runtime-benchmarks"((?!, test), [ \w\-="]*)*\)\)\])|^(#\[cfg\(feature *= *"runtime-benchmarks"\)\])"#, ".");
         let ripgrep_output = str::from_utf8(&ripgrep_process_output.stdout).unwrap();
 
         for line in ripgrep_output.lines() {
@@ -82,6 +84,7 @@ at line {} in {}. Suggested replacement:
 fn run_ripgrep(pattern: &str, path: &str) -> std::process::Output {
     Command::new("rg")
         .arg("--json")
+        .arg("--pcre2") // necessary for negative look-around functionality
         .arg(pattern)
         .arg(path)
         .output()
