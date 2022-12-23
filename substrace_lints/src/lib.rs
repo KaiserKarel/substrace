@@ -201,6 +201,7 @@ pub fn read_conf(sess: &Session) -> Conf {
 pub fn register_plugins(store: &mut rustc_lint::LintStore, _: &Session, _: &Conf) {
 
     // Allows to enable or disable lints in code
+    store.register_lints(&[enable_singlepass_benchmarks::ENABLE_SINGLEPASS_BENCHMARKS]);
     store.register_lints(&[no_panics::PANICS]);
 
     store.register_late_pass(|_| Box::new(enable_singlepass_benchmarks::EnableSinglepassBenchmarks));

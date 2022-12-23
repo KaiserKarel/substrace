@@ -57,15 +57,13 @@ impl<'tcx> LateLintPass<'tcx> for EnableSinglepassBenchmarks {
 
     fn check_crate(&mut self, cx: &LateContext<'tcx>) {
         println!("Checkin crate!");
-        return;
+        // return;
 
 
         let my_str = std::fs::read_to_string("output.jsonl").ok().unwrap();
         // println!("mystring: {:?}", my_str);
 
         let hir_id = cx.last_node_with_lint_attrs;
-
-        println!("hir: {:?}", hir_id);
         
 
         if let hir::Node::Crate(hir::Mod{spans, ..}) = cx.tcx.hir().find(hir_id).unwrap() {
@@ -74,18 +72,19 @@ impl<'tcx> LateLintPass<'tcx> for EnableSinglepassBenchmarks {
                 let the_json: MyGrepResult = serde_json::from_str(&line).unwrap();
     
                 if the_json.type_name == "match" {
-                    println!("Matched file: {:?} at {:?}", the_json.data["path"]["text"], the_json.data["line_number"]);
     
-    
-                    span_lint_and_sugg(
-                        cx,
-                        ENABLE_SINGLEPASS_BENCHMARKS,
-                        spans.inner_span,
-                        "substrace: blabla test runtimes benchmarks",
-                        "test jooo",
-                        format!("En dan hier suggestion"),
-                        Applicability::MachineApplicable, // Suggestion can be applied automatically
-                    );
+                    let warning_message = format!("substrace: benchmarks not run in tests. Matched file: {:?} at {:?}", the_json.data["path"]["text"], the_json.data["line_number"]);
+
+                    cx.tcx.struct_lint_node(ENABLE_SINGLEPASS_BENCHMARKS, hir_id, warning_message, |diag| diag)
+                    // span_lint_and_sugg(
+                    //     cx,
+                    //     ENABLE_SINGLEPASS_BENCHMARKS,
+                    //     spans.inner_span,
+                    //     "substrace: blabla test runtimes benchmarks",
+                    //     "test jooo",
+                    //     format!("En dan hier suggestion"),
+                    //     Applicability::MachineApplicable, // Suggestion can be applied automatically
+                    // );
                     
                 }
     
