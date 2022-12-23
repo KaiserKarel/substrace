@@ -62,7 +62,6 @@ impl<'tcx> LateLintPass<'tcx> for EnableSinglepassBenchmarks {
                 && let Some(found_line) = json_line.data["line_number"].as_u64()
                 && let Some(found_file_name) = json_line.data["path"]["text"].as_str() {
             
-                // TODO: Do we want to keep the formatting used? Or always suggest the same thing here?
                 let suggested_text: &str = "#[cfg(any(feature = \"runtime-benchmarks\", test))]";
             
                 let warning_message = format!("substrace: benchmarks not run in tests.
@@ -79,12 +78,12 @@ at line {} in {}. Suggested replacement:
     }
 }
 
-// Note: In the long run, other lints probably also need to use this, so this should be moved.
+// Run ripgrep with the supplied pattern and path and output to jsonl format.
 fn run_ripgrep(pattern: &str, path: &str) -> std::process::Output {
     Command::new("rg")
         .arg("--json")
         .arg(pattern)
         .arg(path)
         .output()
-        .expect("hmmmm errrrooor")
+        .expect("Failed to run ripgrep.")
 }
