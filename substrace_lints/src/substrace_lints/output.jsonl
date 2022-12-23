@@ -1,4 +1,0 @@
-{"type":"begin","data":{"path":{"text":"./main.rs"}}}
-{"type":"match","data":{"path":{"text":"./main.rs"},"lines":{"text":"#[cfg(feature = \"runtime-benchmarks\")]\r\n"},"line_number":6,"absolute_offset":115,"submatches":[{"match":{"text":"#[cfg(feature = \"runtime-benchmarks\")]"},"start":0,"end":38}]}}
-{"type":"end","data":{"path":{"text":"./main.rs"},"binary_offset":null,"stats":{"elapsed":{"secs":0,"nanos":107231,"human":"0.000107s"},"searches":1,"searches_with_match":1,"bytes_searched":539,"bytes_printed":306,"matched_lines":1,"matches":1}}}
-{"data":{"elapsed_total":{"human":"0.041470s","nanos":41469863,"secs":0},"stats":{"bytes_printed":306,"bytes_searched":539,"elapsed":{"human":"0.000107s","nanos":107231,"secs":0},"matched_lines":1,"matches":1,"searches":1,"searches_with_match":1}},"type":"summary"}

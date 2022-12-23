@@ -14,6 +14,8 @@ use serde::{Deserialize, Serialize};
 
 use std::ffi::OsString;
 use std::error::Error;
+use std::process::Command;
+use std::str;
 
 use termcolor::ColorChoice;
 use walkdir::WalkDir;
@@ -44,13 +46,13 @@ struct MyGrepResult {
     data: serde_json::Value,
 }
 
-// Regex to use: ^#\[cfg\(feature *= *\"runtime-benchmarks\"\)\]
-
 //TODO: Implement auto-fix.
 impl<'tcx> LateLintPass<'tcx> for EnableSinglepassBenchmarks {
 
     fn check_crate(&mut self, cx: &LateContext<'tcx>) {
-        let ripgrep_output = std::fs::read_to_string("output.jsonl").ok().expect("ripgrep output file should be at \"./output.jsonl\"");
+
+        let ripgrep_process_output = run_ripgrep(r#"^#\[cfg\(feature *= *"runtime-benchmarks"\)\]"#, ".");
+        let ripgrep_output = str::from_utf8(&ripgrep_process_output.stdout).unwrap();
 
         for line in ripgrep_output.lines() {
     
@@ -77,61 +79,12 @@ at line {} in {}. Suggested replacement:
     }
 }
 
-fn try_main() -> Result<(), Box<dyn Error>> {
-    let mut args: Vec<OsString> = vec!{};
-    // if args.len() < 2 {
-    //     return Err("Usage: simplegrep <pattern> [<path> ...]".into());
-    // }
-    // if args.len() == 2 {
-        args.push(OsString::from("nowwtf"));
-        args.push(OsString::from("t"));
-        args.push(OsString::from("./src/"));
-    // }
-    search(cli::pattern_from_os(&args[1])?, &args[2..])
-}
-
-fn search(pattern: &str, paths: &[OsString]) -> Result<(), Box<dyn Error>> {
-    println!("paths {:?}", paths);
-    let matcher = RegexMatcher::new_line_matcher(&pattern)?;
-    let mut searcher = SearcherBuilder::new()
-        .binary_detection(BinaryDetection::quit(b'\x00'))
-        .line_number(false)
-        .build();
-    let mut printer = StandardBuilder::new()
-        .color_specs(ColorSpecs::default_with_color())
-        .build(cli::stdout(if cli::is_tty_stdout() {
-            ColorChoice::Auto
-        } else {
-            ColorChoice::Never
-        }));
-
-    for path in paths {
-        for result in WalkDir::new(path) {
-            // println!("WHAT RESULT: {:?}", result);
-            let dent = match result {
-                Ok(dent) => dent,
-                Err(err) => {
-                    eprintln!("{}", err);
-                    continue;
-                }
-            };
-            if !dent.file_type().is_file() {
-                continue;
-            }
-            let result = searcher.search_path(
-                &matcher,
-                dent.path(),
-                printer.sink_with_path(&matcher, dent.path()),
-            );
-            
-            if let Err(err) = result {
-                eprintln!("{}: {}", dent.path().display(), err);
-            }
-        }
-    }
-
-    // let output = String::from_utf8(printer.into_inner().into_inner())?;
-    // println!("OUTPUT: {:?}", output);
-
-    Ok(())
+// Note: In the long run, other lints probably also need to use this, so this should be moved.
+fn run_ripgrep(pattern: &str, path: &str) -> std::process::Output {
+    Command::new("rg")
+        .arg("--json")
+        .arg(pattern)
+        .arg(path)
+        .output()
+        .expect("hmmmm errrrooor")
 }
