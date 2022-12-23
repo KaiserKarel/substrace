@@ -19,6 +19,8 @@ jobs:
       with:
         toolchain: nightly-2022-11-21
         components: clippy
+    - name: Install ripgrep
+      run: cargo install ripgrep --features 'pcre2'
     - name: Build
       run: cargo build --verbose
     - name: Lintcheck
