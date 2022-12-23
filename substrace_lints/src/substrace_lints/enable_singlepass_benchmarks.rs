@@ -1,32 +1,8 @@
-use super::auxiliary::paths;
-use substrace_utils::diagnostics::span_lint_and_sugg;
-use substrace_utils::source::{snippet_opt, line_span};
-use substrace_utils::match_def_path;
-use substrace_utils::is_in_cfg_test;
-use rustc_errors::Applicability;
-use rustc_hir as hir;
-use rustc_ast as ast;
 use rustc_lint::{LateContext, LateLintPass};
 use rustc_session::{declare_lint, impl_lint_pass};
-use rustc_span::source_map::{SourceMap};
-
 use serde::{Deserialize, Serialize};
-
-use std::ffi::OsString;
-use std::error::Error;
 use std::process::Command;
 use std::str;
-
-use termcolor::ColorChoice;
-use walkdir::WalkDir;
-
-use grep::cli;
-use grep::cli::{StandardStream};
-use grep::printer::{ColorSpecs, StandardBuilder};
-use grep::regex::RegexMatcher;
-use grep::searcher::{BinaryDetection, SearcherBuilder};
-
-use super::extrinsics_must_be_tagged::is_extrinsic_name;
 
 declare_lint! {
     pub ENABLE_SINGLEPASS_BENCHMARKS,
@@ -58,7 +34,7 @@ impl<'tcx> LateLintPass<'tcx> for EnableSinglepassBenchmarks {
 
         for line in ripgrep_output.lines() {
     
-            if let Ok(json_line) = serde_json::from_str::<MyGrepResult>(&line)
+            if let Ok(json_line) = serde_json::from_str::<MyGrepResult>(line)
                 && json_line.type_name == "match"
                 && let Some(found_text) = json_line.data["submatches"][0]["match"]["text"].as_str()
                 && let Some(found_line) = json_line.data["line_number"].as_u64()

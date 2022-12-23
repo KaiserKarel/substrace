@@ -74,8 +74,7 @@ pub fn line_span<T: LintContext>(cx: &T, span: Span) -> Span {
 pub fn prev_line_span<T: LintContext>(cx: &T, span: Span) -> Span {
     let line_span_ = line_span(cx, span);
     let line_span_one_byte_back = line_span_.with_lo(BytePos(line_span_.lo().0 - 1));
-    let prev_line_span = line_span(cx, line_span_one_byte_back);
-    prev_line_span
+    line_span(cx, line_span_one_byte_back)
 }
 
 // Based on substrace_utils\src\source.rs:line_span

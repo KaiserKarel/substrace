@@ -28,9 +28,6 @@ rustc-semver = "1.1"
 # NOTE: cargo requires serde feat in its url dep
 # see <https://github.com/rust-lang/rust/pull/63587#issuecomment-522343864>
 url = { version = "2.2", features = ["serde"] }
-grep = "0.2"
-termcolor = "1.0.4"
-walkdir = "2.2.7"
 
 [features]
 deny-warnings = ["substrace_utils/deny-warnings"]
