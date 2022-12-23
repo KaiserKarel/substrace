@@ -40,7 +40,7 @@ impl<'tcx> LateLintPass<'tcx> for EnableSinglepassBenchmarks {
                 && let Some(found_line) = json_line.data["line_number"].as_u64()
                 && let Some(found_file_name) = json_line.data["path"]["text"].as_str() {
             
-                let suggested_text: &str = "#[cfg(any(feature = \"runtime-benchmarks\", test))]";
+                let suggested_text: String = create_suggested_text(found_text);
             
                 let warning_message = format!("substrace: benchmarks not run in tests.
 Found:
@@ -48,11 +48,19 @@ Found:
 at line {} in {}. Suggested replacement:
 {}", found_text, found_line, found_file_name, suggested_text);
 
-                //TODO: hir_id does not matter. Isn't there a lint emitter without it? Currently I grab a random one.
+                //TODO: hir_id does not matter. Isn't there a lint emitter without it? Currently an arbitrary hir_id is used.
                 // Emit lint
                 cx.tcx.struct_lint_node(ENABLE_SINGLEPASS_BENCHMARKS, cx.last_node_with_lint_attrs, warning_message, |diag| diag)
             }
         }
+    }
+}
+
+fn create_suggested_text(text: &str) -> String {
+    if text.contains("any(") { // Example: #[cfg(any(feature = "runtime-benchmarks"))]
+        text.replacen("any(", "any(test, ", 1)
+    } else { // Example: #[cfg(feature = "runtime-benchmarks")]
+        String::from("#[cfg(any(test, feature = \"runtime-benchmarks\"))]")
     }
 }
 
