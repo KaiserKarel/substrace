@@ -44,62 +44,38 @@ struct MyGrepResult {
     data: serde_json::Value,
 }
 
+// Regex to use: ^#\[cfg\(feature *= *\"runtime-benchmarks\"\)\]
+
+//TODO: Implement auto-fix.
 impl<'tcx> LateLintPass<'tcx> for EnableSinglepassBenchmarks {
 
-    // this doesn't work:  those mod calls are optimized away when not running it with feature "runtime-benchmarks"...
-    // Possible fix: Run substrace with this feature on?
-
-    // Also: the runtime-benchmarks could probably be applied to other items. Not just mod delarations.
-    // Possible fix: Use something like check_item
-    fn check_mod(&mut self, cx: &LateContext<'tcx>, the_mod: &'tcx hir::Mod<'tcx>, _: hir::hir_id::HirId) {
-        println!("Checking mod {:?}", snippet_opt(cx, the_mod.spans.inner_span));
-    }
-
     fn check_crate(&mut self, cx: &LateContext<'tcx>) {
-        println!("Checkin crate!");
-        // return;
+        let ripgrep_output = std::fs::read_to_string("output.jsonl").ok().expect("ripgrep output file should be at \"./output.jsonl\"");
 
-
-        let my_str = std::fs::read_to_string("output.jsonl").ok().unwrap();
-        // println!("mystring: {:?}", my_str);
-
-        let hir_id = cx.last_node_with_lint_attrs;
-        
-
-        if let hir::Node::Crate(hir::Mod{spans, ..}) = cx.tcx.hir().find(hir_id).unwrap() {
-            for line in my_str.lines() {
+        for line in ripgrep_output.lines() {
+    
+            if let Ok(json_line) = serde_json::from_str::<MyGrepResult>(&line)
+                && json_line.type_name == "match"
+                && let Some(found_text) = json_line.data["submatches"][0]["match"]["text"].as_str()
+                && let Some(found_line) = json_line.data["line_number"].as_u64()
+                && let Some(found_file_name) = json_line.data["path"]["text"].as_str() {
             
-                let the_json: MyGrepResult = serde_json::from_str(&line).unwrap();
-    
-                if the_json.type_name == "match" {
-    
-                    let warning_message = format!("substrace: benchmarks not run in tests. Matched file: {:?} at {:?}", the_json.data["path"]["text"], the_json.data["line_number"]);
+                // TODO: Do we want to keep the formatting used? Or always suggest the same thing here?
+                let suggested_text: &str = "#[cfg(any(feature = \"runtime-benchmarks\", test))]";
+            
+                let warning_message = format!("substrace: benchmarks not run in tests.
+Found:
+{}
+at line {} in {}. Suggested replacement:
+{}", found_text, found_line, found_file_name, suggested_text);
 
-                    cx.tcx.struct_lint_node(ENABLE_SINGLEPASS_BENCHMARKS, hir_id, warning_message, |diag| diag)
-                    // span_lint_and_sugg(
-                    //     cx,
-                    //     ENABLE_SINGLEPASS_BENCHMARKS,
-                    //     spans.inner_span,
-                    //     "substrace: blabla test runtimes benchmarks",
-                    //     "test jooo",
-                    //     format!("En dan hier suggestion"),
-                    //     Applicability::MachineApplicable, // Suggestion can be applied automatically
-                    // );
-                    
-                }
-    
-                // println!("Json: {:?}, value: {:?}", the_json, the_json.type_name);
+                //TODO: hir_id does not matter. Isn't there a lint emitter without it? Currently I grab a random one.
+                // Emit lint
+                cx.tcx.struct_lint_node(ENABLE_SINGLEPASS_BENCHMARKS, cx.last_node_with_lint_attrs, warning_message, |diag| diag)
             }
         }
-
-        
-
     }
 }
-
-
-
-
 
 fn try_main() -> Result<(), Box<dyn Error>> {
     let mut args: Vec<OsString> = vec!{};
