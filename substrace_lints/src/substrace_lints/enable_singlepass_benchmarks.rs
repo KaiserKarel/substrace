@@ -69,7 +69,7 @@ fn create_suggested_text(text: &str) -> String {
 }
 
 fn search(pattern: &str, path: &str) -> Result<String, Box<dyn Error>> {
-    let matcher = RegexMatcher::new(&pattern)?;
+    let matcher = RegexMatcher::new(pattern)?;
     let mut searcher = SearcherBuilder::new()
         .binary_detection(BinaryDetection::quit(b'\x00'))
         .line_number(true)
