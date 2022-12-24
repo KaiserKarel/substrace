@@ -11,10 +11,8 @@ use std::collections::HashMap;
 use std::env::{self, remove_var, set_var, var_os};
 use std::ffi::{OsStr, OsString};
 use std::fs;
-use std::io;
 use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
-use test_utils::IS_RUSTC_TEST_SUITE;
 
 mod test_utils;
 
