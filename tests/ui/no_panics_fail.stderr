@@ -1,7 +1,7 @@
 error: substrace: clippy must be configured to warn or deny about any panicking code
   --> $DIR/no_panics_fail.rs:1:1
    |
-LL | fn main() {}
+LL | #![allow(enable_singlepass_benchmarks)]
    | ^
    |
    = note: `-D panics` implied by `-D warnings`
@@ -14,7 +14,7 @@ LL +     clippy::todo,
 LL +     clippy::unwrap_used,
 LL +     clippy::panic,
 LL + )]
-LL ~ fn main() {}
+LL ~ #![allow(enable_singlepass_benchmarks)]
    |
 
 error: aborting due to previous error

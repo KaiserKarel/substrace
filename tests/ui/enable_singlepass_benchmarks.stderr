@@ -1,0 +1,32 @@
+error: substrace: benchmarks not run in tests.
+       Found:
+       #[cfg(feature = "runtime-benchmarks")]
+       
+       at line 6 in ./$DIR/enable_singlepass_benchmarks.rs. Suggested replacement:
+       #[cfg(any(test, feature = "runtime-benchmarks"))]
+   |
+   = note: `-D enable-singlepass-benchmarks` implied by `-D warnings`
+
+error: substrace: benchmarks not run in tests.
+       Found:
+       #[cfg(any(feature = "runtime-benchmarks", other_key = "other-value"))]
+       
+       at line 12 in ./$DIR/enable_singlepass_benchmarks.rs. Suggested replacement:
+       #[cfg(any(test, feature = "runtime-benchmarks", other_key = "other-value"))]
+
+error: substrace: benchmarks not run in tests.
+       Found:
+       #[cfg(any(yes = "yes", feature = "runtime-benchmarks"))]
+       
+       at line 18 in ./$DIR/enable_singlepass_benchmarks.rs. Suggested replacement:
+       #[cfg(any(test, yes = "yes", feature = "runtime-benchmarks"))]
+
+error: substrace: benchmarks not run in tests.
+       Found:
+       #[cfg(any(feature="runtime-benchmarks"))]
+       
+       at line 36 in ./$DIR/enable_singlepass_benchmarks.rs. Suggested replacement:
+       #[cfg(any(test, feature="runtime-benchmarks"))]
+
+error: aborting due to 4 previous errors
+
