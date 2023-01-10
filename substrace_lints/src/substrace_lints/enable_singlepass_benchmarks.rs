@@ -33,7 +33,6 @@ impl<'tcx> LateLintPass<'tcx> for EnableSinglepassBenchmarks {
 
     fn check_crate(&mut self, cx: &LateContext<'tcx>) {
 
-        //TODO: Disregard patterns matched in block comments
         // See this pattern in action: https://regex101.com/r/jd6CX1/4
         let ripgrep_output = search(r#"^(#\[cfg\(any\(((?!test, )[ \w\-="]*, )*feature *= *"runtime-benchmarks"((?!, test), [ \w\-="]*)*\)\)\])|^(#\[cfg\(feature *= *"runtime-benchmarks"\)\])"#, ".").expect("error while running libripgrep");
 
